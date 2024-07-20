@@ -1,5 +1,10 @@
+
 ;----BIOS把启动区加载到内存的该位置，所以需设置地址偏移量
 section mbr vstart=0x7c00
+
+;----定义loader起始地址
+LOADER_BASE_ADDR	equ	0x900
+LOADER_BASE_SECTOR	equ	0x02	;所在LBA
 
 ;----设置堆栈地址
 mov sp,0x7c00
@@ -19,11 +24,11 @@ mov byte [gs:0x02],'b'
 mov byte [gs:0x04],'r'
 
 ;----读取硬盘（第2扇区）并加载到内存（0x900)
-mov eax,0x02	;起始扇区lba地址，LBA=(柱面号*磁头数+磁头号)*扇区数+扇区编号-1
-mov bx,0x900    ;写入的内存地址，之后用
-mov cx,4        ;待读入的扇区数
+mov eax,LOADER_BASE_SECTOR	;起始扇区lba地址，LBA=(柱面号*磁头数+磁头号)*扇区数+扇区编号-1
+mov bx,LOADER_BASE_ADDR    ;写入的内存地址，之后用
+mov cx,1        ;待读入的扇区数
 call read_disk
-jmp 0x900
+jmp LOADER_BASE_ADDR
 
 ;----读硬盘方法，eax为lba扇区号，bx为待写入内存地址，cx为读入的扇区数
 read_disk:
