@@ -1,0 +1,20 @@
+KERNEL_BASE_ADDR equ 0x1500
+section	loader	vstart=KERNEL_BASE_ADDR
+
+mov ax, 0xb800
+mov es, ax
+
+mov byte [es:0xb0], 'K'
+mov byte [es:0xb1], 0x07
+mov byte [es:0xb2], 'e'
+mov byte [es:0xb3], 0x06
+mov byte [es:0xb4], 'r'
+mov byte [es:0xb5], 0xa6
+mov byte [es:0xb6], 'n'
+mov byte [es:0xb7], 0x05
+mov byte [es:0xb8], 'e'
+mov byte [es:0xb9], 0x04
+mov byte [es:0xba], 'l'
+mov byte [es:0xbb], 0x03
+
+jmp $
