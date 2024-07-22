@@ -1,37 +1,56 @@
+CC=gcc
+AS=nasm
+LD=ld
+OBJCOPY=objcopy
+CFLAGS=-m16 -nostdlib -nostartfiles -nodefaultlibs -ffreestanding
+LDFLAGS=-Ttext=0x1500 -melf_i386 -nostdlib
+OF=$(IMG)bootloader.img
+
+OUT=./out/
+BIN=./bin/
+IMG=./img/
+
 default: clean install
 
-run:bootloader.img
-	qemu-system-i386 bootloader.img
+run: $(IMG)bootloader.img
+	qemu-system-i386 $(IMG)bootloader.img
 	make clean
-
-img:clean bootloader.img
-	rm -f mbr.bin
-	rm -f loader.bin
-
-bootloader.img: install
 
 install: build write
 
 build: mbr.bin loader.bin kernel.bin
 
 mbr.bin: mbr.asm
-	nasm -f bin mbr.asm -o mbr.bin
+	$(AS) -f bin $< -o $(BIN)$@
 
 loader.bin: loader.asm
-	nasm -f bin loader.asm -o loader.bin
+	$(AS) -f bin $< -o $(BIN)$@
 
-kernel.bin: kernel.asm
-	nasm -f bin kernel.asm -o kernel.bin
+kernel.bin: kernel.elf
+	$(OBJCOPY) -O binary $(OUT)$< $(BIN)$@
+
+kernel.elf: kernel.o print.o
+	$(LD) -s $(patsubst %,$(OUT)%,$^) $(LDFLAGS) -o $(OUT)$@
+
+kernel.o: kernel.c
+	$(CC) $(CFLAGS) -c $< -o $(OUT)$@
+
+print.o: print.asm
+	$(AS) $< -f elf32 -o $(OUT)$@
 
 write:
-	dd if=/dev/zero of=bootloader.img bs=1M count=10
-	dd if=mbr.bin of=bootloader.img bs=512 count=1
-	dd if=loader.bin of=bootloader.img bs=512 count=1 seek=2
-	dd if=kernel.bin of=bootloader.img bs=512 count=1 seek=9
+	dd if=/dev/zero of=$(OF) bs=1 count=14400
+	dd if=$(BIN)mbr.bin of=$(OF) bs=512 count=1 conv=notrunc
+	dd if=$(BIN)loader.bin of=$(OF) bs=512 count=1 seek=2 conv=notrunc
+	dd if=$(BIN)kernel.bin of=$(OF) bs=512 count=24 seek=9 conv=notrunc
 
+only_img:clean install
+	rm -f ./bin/*.bin
+	rm -f ./out/*.o
+	rm -f ./out/kernel.elf
 
 clean:
-	rm -f mbr.bin
-	rm -f loader.bin
-	rm -f kernel.bin
-	rm -f bootloader.img
+	rm -f ./bin/*.bin
+	rm -f ./out/*.o
+	rm -f ./out/kernel.elf
+	rm -f ./img/bootloader.img
