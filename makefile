@@ -12,7 +12,7 @@ IMG=./img/
 
 default: clean install
 
-run: $(IMG)bootloader.img
+run: install
 	qemu-system-i386 $(IMG)bootloader.img
 	make clean
 
