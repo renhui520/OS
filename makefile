@@ -2,7 +2,7 @@ CC=gcc
 AS=nasm
 LD=ld
 OBJCOPY=objcopy
-CFLAGS=-m16 -nostdlib -nostartfiles -nodefaultlibs -ffreestanding
+CFLAGS=-m16 -nostdlib -nostartfiles -nodefaultlibs -ffreestanding -mpreferred-stack-boundary=2
 LDFLAGS=-Ttext=0x1500 -melf_i386 -nostdlib
 OF=$(IMG)bootloader.img
 
@@ -30,7 +30,7 @@ kernel.bin: kernel.elf
 	$(OBJCOPY) -O binary $(OUT)$< $(BIN)$@
 
 kernel.elf: kernel.o print.o
-	$(LD) -s $(patsubst %,$(OUT)%,$^) $(LDFLAGS) -o $(OUT)$@
+	$(LD) $(patsubst %,$(OUT)%,$^) $(LDFLAGS) -o $(OUT)$@
 
 kernel.o: kernel.c
 	$(CC) $(CFLAGS) -c $< -o $(OUT)$@

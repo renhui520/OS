@@ -9,7 +9,6 @@ KERNEL_BASE_SECTOR equ 0x9 ;kernel.bin在第9号扇区开始
 
 
 
-
 mov ax, 0xB800
 mov es, ax
 
@@ -30,7 +29,7 @@ mov byte [es:0xab], 0x06
 
 mov eax,KERNEL_BASE_SECTOR;将kernel写在第9号扇区	;起始扇区lba地址，LBA=(柱面号*磁头数+磁头号)*扇区数+扇区编号-1
 mov bx,KERNEL_BASE_ADDR    ;写入的内存地址，之后用
-mov cx,1        ;待读入的扇区数
+mov cx,1        ;待读入的扇区数		在第二扇区开始往后面读，读多少取决于待读入扇区数，2+n
 
 call read_disk
 jmp KERNEL_BASE_ADDR
@@ -50,7 +49,7 @@ read_disk:
 	mov cl,8
 	;0-7位写入0x1f3
 	mov dx,0x1f3
-	out dx,al
+	out dx,al	;待读入扇区号
 	;8-15位写入0x1f4
 	mov dx,0x1f4
 	shr eax,cl
@@ -68,7 +67,7 @@ read_disk:
 	
 ;第三步，写入读命令
 	mov dx,0x1f7
-	mov al,0x20
+	mov al,0x20	;读指令
 	out dx,al
 
 ;第四步，检测硬盘状态
@@ -85,7 +84,7 @@ read_disk:
 	mul dx
 	mov cx,ax
 	
-	mov dx,0x1f0
+	mov dx,0x1f0	;读数据
 	.go_on_read:
 		in ax,dx
 		mov [bx],ax
