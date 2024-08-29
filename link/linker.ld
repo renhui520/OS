@@ -9,25 +9,21 @@ SECTIONS {
         * (.multiboot)
         build/obj/boot/*.o (.hhk_init)
         build/obj/boot/*.o (.text)
-        build/obj/init/*.o (.text)
     }
 
     .hhk_init_bss BLOCK(4K) :
     {
         build/obj/boot/*.o (.bss)
-        build/obj/init/*.o (.bss)
     }
     
     .hhk_init_data BLOCK(4K) :
     {
         build/obj/boot/*.o (.data)
-        build/obj/init/*.o (.data)
     }
 
     .hhk_init_rodata BLOCK(4K) :
     {
         build/obj/boot/*.o (.rodata)
-        build/obj/init/*.o (.rodata)
     }
 
     . += 0xC0000000;
@@ -55,6 +51,7 @@ SECTIONS {
     
     .kpg BLOCK(4K) : AT ( ADDR(.kpg) - 0xC0000000)
     {
+    	build/obj/boot/*.o (.kpg)
         build/obj/kernel/*.o (.kpg)
     }
 

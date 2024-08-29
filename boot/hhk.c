@@ -1,7 +1,6 @@
 #include <stdint.h>
 #include <boot/multiboot.h>
 #include <mm/page.h>
-#include <tty/tty.h>
 
 //检查 multiboot flags 是否 等于 某个标志位（info）
 //若是 返回非0
@@ -38,8 +37,6 @@ uint32_t __save_subset(uint8_t* destination, uint8_t* base, unsigned int size) {
 void 
 _save_multiboot_info(multiboot_info_t* info, uint8_t* destination) {
 
-    tty_set_theme(VGA_COLOR_GREEN, VGA_COLOR_BLACK);
-    tty_put_str("Kernel Initing...");
     uint32_t current = 0;
     uint8_t* info_b = (uint8_t*) info;  //指向传给info的地址
     for (; current < sizeof(multiboot_info_t); current++)

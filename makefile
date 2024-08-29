@@ -32,7 +32,7 @@ ISO_BOOT_DIR := $(ISO_DIR)/boot
 ISO_GRUB_DIR := $(ISO_BOOT_DIR)/grub
 
 # 内核名称
-OS_NAME = HenRuiOS
+OS_NAME = OS
 OS_ARCH = x86
 OS_BIN = $(OS_NAME).bin
 OS_ISO = $(OS_NAME).iso

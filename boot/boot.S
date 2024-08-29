@@ -43,13 +43,14 @@
                 movl    %ebx, (%esp)
                 call    _save_multiboot_info
 
+		//没搞懂 不知道为什么无法打印
+		//call init
                 /* Push the pointer to the Multiboot information structure. */
                 //pushl   %ebx
                 /* Push the magic value. */
                 //pushl   %eax
-                call    init
                 
                 movl    $(KPG_SIZE), 4(%esp)
                 movl    $(_k_ptd - 0xC0000000), (%esp)
                 call    _hhk_init
-                addl $16, %esp
+                addl 	$16, %esp
