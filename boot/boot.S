@@ -5,7 +5,8 @@
 #define KPG_SIZE 24*1024 // 24KiB
 
 
-        /* Multiboot header. */
+/* Multiboot header. */
+/* 仅需MAGIC FLAGS CHECKSUM即可识别 */
 .section .multiboot
         .long   MULTIBOOT_HEADER_MAGIC/* magic */
         .long   MULTIBOOT_HEADER_FLAGS/* flags */
@@ -39,18 +40,29 @@
                 movl    $stack_top, %esp
                 subl    $16, %esp
                 
+                /* 传参 mb_info地址 */
                 movl    $mb_info, 4(%esp)
+                /* Push the pointer to the Multiboot information structure. */
                 movl    %ebx, (%esp)
                 call    _save_multiboot_info
 
-		//没搞懂 不知道为什么无法打印
-		//call init
-                /* Push the pointer to the Multiboot information structure. */
-                //pushl   %ebx
                 /* Push the magic value. */
                 //pushl   %eax
                 
                 movl    $(KPG_SIZE), 4(%esp)
-                movl    $(_k_ptd - 0xC0000000), (%esp)
+                movl    $(_k_ptd - 0xC0000000), (%esp) // 将页目录地址 传给hhk_init
                 call    _hhk_init
+                
+                movl    (%esp), %eax
+                andl    0xfffff000, %eax
+                movl    %eax, %cr3
+
+                movl    %cr0, %eax
+                orl     0x80000000, %eax        // 将 CR0.PG 设置为1
+                movl    %eax, %cr0              // 开启分页
+                //因为使用的是multiboot+grub所以无须设置PE位
+
                 addl 	$16, %esp
+
+                pushl   $hhk_entry_
+                ret

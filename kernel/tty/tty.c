@@ -6,8 +6,13 @@
 static uint32_t tty_x = 0;
 static uint16_t tty_y = 0;
 
-static uint8_t* tty_vga_buffer = (uint8_t*)0xB8000;
+static uint16_t* tty_vga_buffer = (uint16_t*)0xB8000;
 static uint16_t tty_theme_color = VGA_COLOR_BLACK;
+
+void tty_init(void* vga_buffer)
+{
+    tty_vga_buffer = (uint16_t*)vga_buffer;
+}
 
 void tty_set_theme(uint16_t fg, uint16_t bg)
 {

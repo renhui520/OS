@@ -90,8 +90,8 @@ all: clean $(BUILD_DIR)/$(OS_ISO)
 
 # Debug OS
 all-debug: O := -O0
-all-debug: CFLAGS := -m32 -g -std=gnu99 -ffreestanding $(O) $(W) $(ARCH_OPT) -no-pie -fno-pie
-	#-D__LUNAIXOS_DEBUG__
+all-debug: CFLAGS := -m32 -g -std=gnu99 -ffreestanding $(O) $(W) $(ARCH_OPT) -no-pie -fno-pie -D__OS_DEBUG__
+all-debug: ASFLAGS := -m32 -g -ffreestanding $(O) -no-pie -fno-pie
 all-debug: LDFLAGS := -m32 -g -ffreestanding $(O) -nostdlib -no-pie -fno-pie -Wl,--build-id=none
 
 all-debug: clean $(BUILD_DIR)/$(OS_ISO)
@@ -114,6 +114,14 @@ debug-qemu: all-debug
 	@sleep 1
 	@$(QEMU_MON_TERM) -- telnet 127.0.0.1 $(QEMU_MON_PORT)
 	@gdb -s $(BUILD_DIR)/kernel.dbg -ex "target remote localhost:1234"
+
+# vscode 调试 内核
+debug-qemu-vscode: all-debug
+	@$(OBJCOPY) --only-keep-debug $(BIN_DIR)/$(OS_BIN) $(BUILD_DIR)/kernel.dbg
+	@qemu-system-i386 -s -S -m 1G -cdrom $(BUILD_DIR)/$(OS_ISO) -monitor telnet::$(QEMU_MON_PORT),server,nowait &
+	@sleep 0.5
+	@telnet 127.0.0.1 $(QEMU_MON_PORT)
+
 
 # 清除生成的文件
 clean:

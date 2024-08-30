@@ -20,6 +20,7 @@
 #define VGA_COLOR_LIGHT_BROWN 14
 #define VGA_COLOR_WHITE 15
 
+void tty_init(void* vga_buffer);
 void tty_set_theme(uint16_t fg, uint16_t bg);
 void tty_put_char(char chr);
 void tty_put_str(char* str);

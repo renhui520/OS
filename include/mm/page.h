@@ -12,6 +12,7 @@
 
 #define PTE_NULL                    0                       // 页表项为空 或 无效
 
+#define HIGHER_HLF_BASE 0xC0000000UL
 #define P2V(paddr)          ((uintptr_t)(paddr)  +  HIGHER_HLF_BASE)    // 将 物理地址 转换为 虚拟地址
 #define V2P(vaddr)          ((uintptr_t)(vaddr)  -  HIGHER_HLF_BASE)    // 将 虚拟地址 转换为 物理地址
 

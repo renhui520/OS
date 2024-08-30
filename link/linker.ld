@@ -25,6 +25,7 @@ SECTIONS {
     {
         build/obj/boot/*.o (.rodata)
     }
+    __init_hhk_end = ALIGN(4K);
 
     . += 0xC0000000;
 
@@ -52,7 +53,6 @@ SECTIONS {
     .kpg BLOCK(4K) : AT ( ADDR(.kpg) - 0xC0000000)
     {
     	build/obj/boot/*.o (.kpg)
-        build/obj/kernel/*.o (.kpg)
     }
 
     __kernel_end = ALIGN(4K);
