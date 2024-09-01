@@ -18,11 +18,11 @@
 
 //0xFFFFF000UL在二进制表示中为 1111111111111111111111111111111100000000
 //最高20位保持不变 最低12位被清零   4KB对齐?
-#define PG_ALIGN(addr)      ((uintptr_t)(addr)   & 0xFFFFF000UL)        // 将地址转换为页对齐的地址
+#define PG_ALIGN(addr)      ((uintptr_t)(addr)   & 0xFFFFF000UL)        // 将低12位(标志位)清零 保证只有页地址
 
-#define L1_INDEX(vaddr)     (uint32_t)(((uintptr_t)(vaddr) & 0xFFC00000UL) >> 22)   // 获取虚拟页目录索引 PDE?
-#define L2_INDEX(vaddr)     (uint32_t)(((uintptr_t)(vaddr) & 0x003FF000UL) >> 12)   // 获取虚拟页表索引 PTE?
-#define PG_OFFSET(vaddr)    (uint32_t)((uintptr_t)(vaddr)  & 0x00000FFFUL)        // 获取页内偏移
+#define L1_INDEX(vaddr)     (uint32_t)(((uintptr_t)(vaddr) & 0xFFC00000UL) >> 22)   // 获取虚拟页目录索引 PDE? 保留高10位，右移22位
+#define L2_INDEX(vaddr)     (uint32_t)(((uintptr_t)(vaddr) & 0x003FF000UL) >> 12)   // 获取虚拟页表索引   PTE? 保留中10位，右移12位
+#define PG_OFFSET(vaddr)    (uint32_t)((uintptr_t)(vaddr)  & 0x00000FFFUL)        // 获取页内偏移   保留低12位
 
 #define GET_PT_ADDR(pde)    PG_ALIGN(pde)   // 获取页目录地址
 #define GET_PG_ADDR(pte)    PG_ALIGN(pte)   // 获取页表地址
@@ -39,10 +39,10 @@
 #define PG_DISABLE_CACHE        (1 << 4)    // 页表 [禁用缓存]
 #define PG_PDE_4MB              (1 << 7)    // 页表 [4MB]
 
-//0xfff ==> 111111111111
+//(flags) & 0xfff) 的0xfff ==> 111111111111
 //高位清零，低位不变
-#define NEW_L1_ENTRY(flags, pt_addr)     (PG_ALIGN(pt_addr) | ((flags) & 0xfff))    // 新建页目录项 pde
-#define NEW_L2_ENTRY(flags, pg_addr)     (PG_ALIGN(pg_addr) | ((flags) & 0xfff))    // 新建页表项 pte
+#define NEW_L1_ENTRY(flags, pt_addr)     (PG_ALIGN(pt_addr) | ((flags) & 0xfff))    // 新建页目录项(页表)  pde
+#define NEW_L2_ENTRY(flags, pg_addr)     (PG_ALIGN(pg_addr) | ((flags) & 0xfff))    // 新建页表项   pte
 
 #define V_ADDR(pd, pt, offset)  ((pd) << 22 | (pt) << 12 | (offset)) // 获取虚拟地址
 #define P_ADDR(ppn, offset)     ((ppn << 12) | (offset)) // 获取物理地址
