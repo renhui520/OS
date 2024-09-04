@@ -10,7 +10,4 @@ void init(void)
    tty_set_theme(VGA_COLOR_GREEN, VGA_COLOR_BLACK);
    tty_put_str("Kernel Initing...\n");
    tty_put_str("AWA OS Kernel booting...\n");
-   tty_put_str("AbcdefghijklmnopqrstuvwxyzAbcdefghijklmnopqrstuvwxyzAbcdefghi2klmnopqrstuvwxyzAbc\n"); 
-   tty_put_str("1209141\n"); 
-
 }

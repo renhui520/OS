@@ -64,12 +64,20 @@ void tty_put_str(const char* str)
     }
 }
 
-/**
- * @todo : 滚动
- * @todo : memcpy
- */
 void tty_scroll_up(void)
 {
+    size_t no_last_line = TTY_WIDTH * (TTY_HEIGHT - 1);
+    
+    // no_last_line * 2是因为每个字符占两个字节，tty需要2个字节组成一个颜色字符 (颜色 | 字符)
+    // 将文本整体向上移动一行？
+    memcpy(tty_vga_buffer, tty_vga_buffer + TTY_WIDTH, no_last_line * 2);
+
+    for (size_t i = 0; i < TTY_WIDTH; i++)
+    {
+        // 清除最后一行所有信息
+        *(tty_vga_buffer + no_last_line + i) = tty_theme_color;
+    }
+    tty_y = tty_y == 0 ? 0 : TTY_HEIGHT - 1; 
 
 }
 

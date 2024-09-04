@@ -24,6 +24,9 @@
         retf
 
     _after_gdt:
+    /**
+      * @ TODO: 实现 IDT
+    */
 
         // 加载IDT  目前没写中断向量表
         //call     _init_idt
