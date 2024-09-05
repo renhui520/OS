@@ -1,0 +1,6 @@
+default=0
+timeout=5
+
+menuentry "$_OS_NAME" {
+	multiboot /boot/$_OS_NAME.bin
+}
