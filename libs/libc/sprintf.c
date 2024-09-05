@@ -184,6 +184,7 @@ void __sprintf_internal(char* buffer, char* fmt, size_t max_len, va_list args)
         for (; zeros > 0; --zeros) {
             buffer[ptr++] = '0';
         }
+        // @bug: len = 1 data="awa" *data='a' --len = 0 无法复制齐全
         for (; len > 0; ++data, --len) {
             buffer[ptr++] = *data;
         }

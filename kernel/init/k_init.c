@@ -14,8 +14,8 @@ void init(void)
    uint16_t a = tty_get_theme();
    char buf[500];
 
-   itoa(1234567891, buf, 10);
-   // snprintf(buf, 500, "%s", "awa");
+   // itoa(1234567891, buf, 10);
+   snprintf(buf, 500, "Num: %d", 100);
 
    tty_put_str(buf);
 
