@@ -96,7 +96,7 @@ void _init_page(uint32_t* ptd)
     //ptd+1024U => 第一个页表 SET_PTE默认会向后偏移一个页表
     SET_PDE(ptd, 
             0,  //0x0地址换算PDE为0
-            NEW_L1_ENTRY(PG_PREM_RW, ptd + 1024U)
+            NEW_L1_ENTRY(PG_PREM_RW, ptd + 1024U) // ptd + 1024U ==> PG_TABLE_IDENTITY
             ) // +1024表示跳过第一个页表项，即指向下一个页表
     for (uint32_t i = 0; i < ONE_MiB_PAGE_COUNT + HHK_PAGE_COUNT; i++)
     {

@@ -1,6 +1,6 @@
 #include <tty/tty.h>
-
-void init(void);
+#include <libc/stdio.h>
+#include <libc/stdlib.h>
 
 void init(void)
 {
@@ -10,4 +10,52 @@ void init(void)
    tty_set_theme(VGA_COLOR_GREEN, VGA_COLOR_BLACK);
    tty_put_str("Kernel Initing...\n");
    tty_put_str("AWA OS Kernel booting...\n");
+   
+   uint16_t a = tty_get_theme();
+   char buf[500];
+
+   itoa(1234567891, buf, 10);
+   // snprintf(buf, 500, "%s", "awa");
+
+   tty_put_str(buf);
+
+   // tty_put_str("a\n");
+   // tty_put_str("a\n");
+   // tty_put_str("a\n");
+   // tty_put_str("a\n");
+   // tty_put_str("a\n");
+   // tty_put_str("a\n");
+   // tty_put_str("a\n");
+   // tty_put_str("a\n");
+   // tty_put_str("a\n");
+   // tty_put_str("a\n");
+   // tty_put_str("a\n");
+   // tty_put_str("a\n");
+   // tty_put_str("a\n");
+   // tty_put_str("a\n");
+   // tty_put_str("a\n");
+   // tty_put_str("a\n");
+   // tty_put_str("a\n");
+   // tty_put_str("a\n");
+   // tty_put_str("a\n");
+   // tty_put_str("a\n");
+   // tty_put_str("a\n");
+   // tty_put_str("a\n");
+   // tty_put_str("a\n");
+   // tty_put_str("a\n");
+   // tty_put_str("a\n");
+   // tty_put_str("a\n");
+   // tty_put_str("a\n");
+   // tty_put_str("a\n");
+   // tty_put_str("a\n");
+   // tty_put_str("a\n");
+   // tty_put_str("a\n");
+   // tty_put_str("a\n");
+   // tty_put_str("a\n");
+   // tty_put_str("a\n");
+   // tty_put_str("a\n");
+   // tty_put_str("a\n");
+   // tty_put_str("b\n");
+   // tty_put_str("c\n");
+   // tty_put_str("d\n");
 }

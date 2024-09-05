@@ -2,6 +2,7 @@
 #define __OS_STRING_H__
 
 #include <stddef.h>
+#include <stdint.h>
 
 int memcmp(const void*, const void*, size_t);
 // void* memcpy(void* __restrict, const void* __restrict, size_t);

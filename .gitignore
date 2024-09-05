@@ -3,5 +3,9 @@
 # 忽略c_cpp_properties.json
 .vscode/c_cpp_properties.json
 
+.gdb_history
+
+TODO
+
 # 忽略任何目录下名为build的文件夹
 build/
