@@ -3,9 +3,14 @@
 # 忽略c_cpp_properties.json
 .vscode/c_cpp_properties.json
 
+# 忽略gdb历史记录
 .gdb_history
 
+# 忽略TODO
 TODO
+
+# 忽略所有 vim 产生的临时 swp文件
+*.swp
 
 # 忽略任何目录下名为build的文件夹
 build/

@@ -91,10 +91,28 @@ void tty_clear(void)
         tty_y = 0;
     } 
 }
+void tty_clear_line(unsigned int y)
+{
+    for (size_t i = 0; i < TTY_WIDTH; i++)
+    {
+        *(tty_vga_buffer + i + y * TTY_WIDTH) = tty_theme_color;
+    }
+}
+
+void tty_set_pos(unsigned int x, unsigned int y)
+{
+    tty_x = x % TTY_WIDTH; // '%' 防止溢出
+    tty_y = y % TTY_HEIGHT;
+}
 
 // get information about tty
 uint16_t tty_get_theme()
 {
     return tty_theme_color;
+}
+void tty_get_pos(unsigned int* x, unsigned int* y)
+{
+    *x = tty_x;
+    *y = tty_y;
 }
 

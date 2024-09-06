@@ -1,61 +1,35 @@
 #include <tty/tty.h>
 #include <libc/stdio.h>
 #include <libc/stdlib.h>
+#include <kernel/sysio.h>
+
+#include <kernel/interrupts.h>
+
+// 创建kprintf函数
+// KINFO KWARN KERROR 作为LOG等级参数
+// kprintf(KINFO "awa");
+LOG_MODULE("OS")
 
 void init(void)
 {
+   // 初始化 中断处理 函数
+   intr_init();
+
    // tty必须要在分页映射后才可使用，因为linker脚本把kernel下的文件全都分到高半核了，不在同一个段，没法使用
    tty_init((void*)0xb8000UL);
    tty_clear();
-   tty_set_theme(VGA_COLOR_GREEN, VGA_COLOR_BLACK);
-   tty_put_str("Kernel Initing...\n");
-   tty_put_str("AWA OS Kernel booting...\n");
+   tty_set_theme(VGA_COLOR_WHITE, VGA_COLOR_BLACK);
+
+   // kernel initing...
+   kprintf(KLOG "Kernel Initing...\n");
+   kprintf(KLOG "AWA OS Kernel booting...\n");
    
-   uint16_t a = tty_get_theme();
-   char buf[500];
-
-   // itoa(1234567891, buf, 10);
-   snprintf(buf, 500, "Num: %d", 100);
-
-   tty_put_str(buf);
-
-   // tty_put_str("a\n");
-   // tty_put_str("a\n");
-   // tty_put_str("a\n");
-   // tty_put_str("a\n");
-   // tty_put_str("a\n");
-   // tty_put_str("a\n");
-   // tty_put_str("a\n");
-   // tty_put_str("a\n");
-   // tty_put_str("a\n");
-   // tty_put_str("a\n");
-   // tty_put_str("a\n");
-   // tty_put_str("a\n");
-   // tty_put_str("a\n");
-   // tty_put_str("a\n");
-   // tty_put_str("a\n");
-   // tty_put_str("a\n");
-   // tty_put_str("a\n");
-   // tty_put_str("a\n");
-   // tty_put_str("a\n");
-   // tty_put_str("a\n");
-   // tty_put_str("a\n");
-   // tty_put_str("a\n");
-   // tty_put_str("a\n");
-   // tty_put_str("a\n");
-   // tty_put_str("a\n");
-   // tty_put_str("a\n");
-   // tty_put_str("a\n");
-   // tty_put_str("a\n");
-   // tty_put_str("a\n");
-   // tty_put_str("a\n");
-   // tty_put_str("a\n");
-   // tty_put_str("a\n");
-   // tty_put_str("a\n");
-   // tty_put_str("a\n");
-   // tty_put_str("a\n");
-   // tty_put_str("a\n");
-   // tty_put_str("b\n");
-   // tty_put_str("c\n");
-   // tty_put_str("d\n");
+   for (int i = 0; i < 2; i++)
+   {
+      kprintf("awa I Love U Creator!!! Times: %d\n", i);
+   }
+   
+   int a = 1/0;   // 这样不知道为什么不行QAQ
+   // 触发 1 / 0 异常   这样可以
+   // __asm__("int $0");
 }

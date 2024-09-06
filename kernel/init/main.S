@@ -29,14 +29,15 @@
     */
 
         // 加载IDT  目前没写中断向量表
-        //call     _init_idt
-        //subl    $6, %esp    //预留6字节空间给IDT
-        //movl    _idt, 2(%esp)
-        //movw    _idt_limit, %ax
-        //movw    %ax, (%esp)
-        //lidt    (%esp)
-        //addl    $6, %esp    //释放6字节空间 (%esp)=2字节 2(%esp)=4字节
+        call    _init_idt
+        subl    $6, %esp    //预留6字节空间给IDT
+        movl    $_idt, 2(%esp)
+        movw    _idt_limit, %ax
+        movw    %ax, (%esp)
+        lidt    (%esp)
+        addl    $6, %esp    //释放6字节空间 (%esp)=2字节 2(%esp)=4字节
 
+        sti
         //kernel init
         call    init
 

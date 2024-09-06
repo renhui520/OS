@@ -1,4 +1,5 @@
 #include <boot/idt.h>
+#include <kernel/interrupts.h>
 
 #define IDT_ENTRY_SIZE 256
 
@@ -16,5 +17,5 @@ void _set_idt_entry(uint32_t vector, uint16_t seg_selector, void(*isr)(), uint8_
 
 void _init_idt()
 {
-    // _set_idt_entry(0, 0x08, _asm_isr_0, 0);
+    _set_idt_entry(0, 0x08, _asm_isr_0, 0);
 }

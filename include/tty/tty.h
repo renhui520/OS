@@ -25,9 +25,11 @@ void tty_set_theme(uint16_t fg, uint16_t bg);
 void tty_put_char(const char chr);
 void tty_put_str(const char* str);
 void tty_clear();
+void tty_clear_line(unsigned int y);
+void tty_set_pos(unsigned int x, unsigned int y);
 
 // get information about the tty
 uint16_t tty_get_theme();
-
+void tty_get_pos(unsigned int* x, unsigned int* y);
 
 #endif
