@@ -6,7 +6,7 @@
 
 #ifdef __LIBC__
 
-void __sprintf_internal(char* buffer, char* fmt, size_t max_len, va_list args);
+void __sprintf_internal(char* buffer, const char* fmt, size_t max_len, va_list args);
 
 #endif
 

@@ -16,7 +16,7 @@ void init(void)
    intr_init();
 
    // tty必须要在分页映射后才可使用，因为linker脚本把kernel下的文件全都分到高半核了，不在同一个段，没法使用
-   tty_init((void*)0xb8000UL);
+   tty_init((void*)0xb8000UL);   // 设置文本内容缓冲区
    tty_clear();
    tty_set_theme(VGA_COLOR_WHITE, VGA_COLOR_BLACK);
 
@@ -26,10 +26,11 @@ void init(void)
    
    for (int i = 0; i < 2; i++)
    {
-      kprintf("awa I Love U Creator!!! Times: %d\n", i);
+      kprintf("awa I Love U Creator!!! Times: %d\n", i+1);
    }
    
-   int a = 1/0;   // 这样不知道为什么不行QAQ
+   // int a = 1/0;   // 启用了 -Werror 这种情况无法通过编译器，所以无法编译 要触发这种错误就只能另寻他法了
+
    // 触发 1 / 0 异常   这样可以
-   // __asm__("int $0");
+   __asm__("int $0");
 }

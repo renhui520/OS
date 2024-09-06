@@ -29,8 +29,9 @@ void tty_put_char(const char chr)
         tty_x += 4;
         break;
     case '\n':
-        // tty_x = 0;
+        tty_x = 0;
         tty_y++;
+        break;
     case '\r':
         tty_x = 0;
         break; 
@@ -106,7 +107,7 @@ void tty_set_pos(unsigned int x, unsigned int y)
 }
 
 // get information about tty
-uint16_t tty_get_theme()
+uint16_t tty_get_theme(void)
 {
     return tty_theme_color;
 }

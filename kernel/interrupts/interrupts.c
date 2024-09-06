@@ -1,12 +1,29 @@
 #include <kernel/interrupts.h>
 #include <tty/tty.h>
 #include <kernel/sysio.h>
+#include <hal/io.h>
 
-void intr_routine_divide_zero(const isr_param* param);
+// 具体中断处理
+void intr_routine_divide_zero(isr_param* param);
+
+
 
 static int_subscriber subscribers[256];
 
 static int_subscriber fallback = (int_subscriber) 0;
+
+
+static void 
+__print_panic_msg(const char* msg, const isr_param* param) 
+{
+    kprintf_panic("  INT %u: (%x) [%p: %p] %s",
+            param->vector,
+            param->err_code,
+            param->cs,
+            param->eip,
+            msg);
+}
+
 
 void intr_subscribe(const uint8_t vector, int_subscriber subscriber)
 {
@@ -22,7 +39,7 @@ void intr_unsubscribe(const uint8_t vector, int_subscriber subscriber)
 }
 void intr_set_fallback_handler(int_subscriber subscriber)
 {
-    fallback = subscribers;
+    fallback = subscriber;
 }
 void intr_handler(isr_param* param)
 {
@@ -43,24 +60,28 @@ done:
     return;
 }
 
+// --禁用PIC--
+#define PIC1_DATA    0x21
+#define PIC2_DATA    0xA1
+
+#define ICW1_DISABLE    0xFF // Disable PIC
+//禁用PIC
+void disable_8259A()
+{
+    outb(PIC1_DATA, ICW1_DISABLE);
+    outb(PIC2_DATA, ICW1_DISABLE);
+}
+
 void intr_init()
 {
     intr_subscribe(0, intr_routine_divide_zero);
 }
-// static void 
-// __print_panic_msg(const char* msg, const isr_param* param) 
-// {
-//     kprint_panic("  INT %u: (%x) [%p: %p] %s",
-//             param->vector,
-//             param->err_code,
-//             param->cs,
-//             param->eip,
-//             msg);
-// }
 
-void intr_routine_divide_zero(const isr_param* param)
+
+void intr_routine_divide_zero(isr_param* param)
 {
-    kprintf_panic("     [%s] Divide by zero\n", "ERROR!");
+    __print_panic_msg("Divide by zero\n", param);
+    // kprintf_panic("     [%s] Divide by zero\n", "ERROR!");
     while(1);   //不写这个会不断重启!!!
 }
 void intr_routine_init()

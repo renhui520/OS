@@ -2,6 +2,7 @@
 
 #include <libc/string.h>
 #include <libc/stdio.h>
+#include <libc/stdlib.h>
 
 #include <stdint.h>
 
@@ -24,7 +25,7 @@ static const char flag_chars[] = "#0- +";
 #define FLAG_ALT2               (1<<8)
 #define FLAG_CAPS               (1<<9)
 
-void __sprintf_internal(char* buffer, char* fmt, size_t max_len, va_list args)
+void __sprintf_internal(char* buffer, const char* fmt, size_t max_len, va_list args)
 {
     char numbuf[NUMBUFSIZ];
     uint32_t ptr = 0;

@@ -15,13 +15,16 @@ LINK=link/linker.ld
 
 # 编译选项
 ARCH_OPT := -D__ARCH_IA32
-O := -O2
-W := -Wall -Wextra -Wno-unknown-pragmas
+O := -O0
+W := -Wall -Werror -Wextra -Wno-unknown-pragmas -Wpointer-arith -Wredundant-decls
+DEBUG := -g -fno-omit-frame-pointer
+SAFE :=	-D_FORTIFY_SOURCE=2
+NO :=  -no-pie -fno-pie
 
 # 编译规则和选项
-CFLAGS := -m32 -std=gnu99 -ffreestanding $(O) $(W) $(ARCH_OPT) -no-pie -fno-pie
-ASFLAGS := -m32 -no-pie -fno-pie
-LDFLAGS := -m32 -no-pie -fno-pie -ffreestanding $(O) -nostdlib -Wl,--build-id=none
+CFLAGS := -m32 -std=gnu99 -ffreestanding $(O) $(W) $(ARCH_OPT) $(NO) $(SAFE)
+ASFLAGS := -m32 -ffreestanding $(NO) $(O) $(SAFE) 
+LDFLAGS := -m32 -ffreestanding $(NO) $(O) $(SAFE) -nostdlib -Wl,--build-id=none
 
 # 目标文件夹
 BUILD_DIR := build
@@ -88,11 +91,22 @@ $(BUILD_DIR)/$(OS_ISO): $(ISO_DIR) $(BIN_DIR)/$(OS_BIN) GRUB_TEMPLATE
 
 all: clean $(BUILD_DIR)/$(OS_ISO)
 
+
+# 快速运行 不考虑任何问题 提高优化程度
+fast-run: O := -O2
+fast-run: W := -Wall -Wextra
+fast-run: CFLAGS := -m32 -std=gnu99 -ffreestanding $(O) $(W) $(ARCH_OPT) $(NO)
+fast-run: ASFLAGS := -m32 -ffreestanding $(O) $(NO)
+fast-run: LDFLAGS := -m32 -ffreestanding $(O) $(NO) -nostdlib -Wl,--build-id=none
+fast-run: clean $(BUILD_DIR)/$(OS_ISO)
+fast-run: run
+
+
 # Debug OS
 all-debug: O := -O0
-all-debug: CFLAGS := -m32 -g -std=gnu99 -ffreestanding $(O) $(W) $(ARCH_OPT) -no-pie -fno-pie -D__OS_DEBUG__
-all-debug: ASFLAGS := -m32 -g -ffreestanding $(O) -no-pie -fno-pie
-all-debug: LDFLAGS := -m32 -g -ffreestanding $(O) -nostdlib -no-pie -fno-pie -Wl,--build-id=none
+all-debug: CFLAGS := -m32 -std=gnu99 -ffreestanding $(O) $(W) $(ARCH_OPT) $(DEBUG) $(SAFE) $(NO) -D__OS_DEBUG__
+all-debug: ASFLAGS := -m32 -ffreestanding $(O) $(DEBUG) $(SAFE) $(NO)
+all-debug: LDFLAGS := -m32 -ffreestanding $(O) $(DEBUG) $(SAFE) $(NO) -nostdlib -Wl,--build-id=none
 
 all-debug: clean $(BUILD_DIR)/$(OS_ISO)
 	@echo "Dumping the disassembled kernel code to $(BUILD_DIR)/kdump.txt"
