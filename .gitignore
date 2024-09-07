@@ -7,7 +7,7 @@
 .gdb_history
 
 # 忽略TODO
-TODO
+# TODO
 
 # 忽略所有 vim 产生的临时 swp文件
 *.swp

@@ -24,9 +24,9 @@
         retf
 
     _after_gdt:
-    /**
-      * @ TODO: 实现 IDT
-    */
+
+        // 将multiboot结构体传给 k_init.c 使用
+        movl    $mb_info, _k_init_mb_info
 
         // 加载IDT  目前没写中断向量表
         call    _init_idt

@@ -6,11 +6,13 @@
 #define _LEVEL_INFO  "0"
 #define _LEVEL_WARN  "1"
 #define _LEVEL_ERROR "2"
-#define _LEVEL_LOG   "3"
+#define _LEVEL_INIT  "3"
+#define _LEVEL_LOG   "4"
 
 #define KINFO    "\x1b" _LEVEL_INFO
 #define KWARN    "\x1b" _LEVEL_WARN
 #define KERROR   "\x1b" _LEVEL_ERROR
+#define KINIT    "\x1b" _LEVEL_INIT
 #define KLOG     "\x1b" _LEVEL_LOG
 
 //static使函数局部可见，当调用这个宏的时候会生成一个kprintf函数，且还会由于static避免与其他文件的kprintf名称冲突

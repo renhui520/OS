@@ -18,7 +18,7 @@
 
 //0xFFFFF000UL在二进制表示中为 1111111111111111111111111111111100000000
 //最高20位保持不变 最低12位被清零   4KB对齐?
-#define PG_ALIGN(addr)      ((uintptr_t)(addr)   & 0xFFFFF000UL)        // 将低12位(标志位)清零 保证只有页地址
+#define PG_ALIGN(addr)      ((uintptr_t)(addr)   & 0xFFFFF000UL)        // 4K 对齐 将低12位(标志位)清零 保证只有页地址
 
 #define L1_INDEX(vaddr)     (uint32_t)(((uintptr_t)(vaddr) & 0xFFC00000UL) >> 22)   // 获取虚拟页目录索引 PDE? 保留高10位，右移22位
 #define L2_INDEX(vaddr)     (uint32_t)(((uintptr_t)(vaddr) & 0x003FF000UL) >> 12)   // 获取虚拟页表索引   PTE? 保留中10位，右移12位

@@ -27,12 +27,16 @@ void __kprintf(const char* component, const char* fmt, va_list args)
         snprintf(expanded_fmt, 1024, "[%s] (%s) %s", "INFO", component, fmt);
         break;
     case '1':
-        tty_set_theme(VGA_COLOR_BROWN, theme >> 12);
+        tty_set_theme(VGA_COLOR_LIGHT_BROWN, theme >> 12);
         snprintf(expanded_fmt, 1024, "[%s] (%s) %s", "WARN", component, fmt);
         break;
     case '2':
         tty_set_theme(VGA_COLOR_LIGHT_RED, theme >> 12);
         snprintf(expanded_fmt, 1024, "[%s] (%s) %s", "EROR", component, fmt);
+        break;
+    case '3':
+        tty_set_theme(VGA_COLOR_BROWN, theme >> 12);
+        snprintf(expanded_fmt, 1024, "[%s] (%s) %s", "INIT", component, fmt);
         break;
     default:
         tty_set_theme(VGA_COLOR_GREEN, theme >> 12);
