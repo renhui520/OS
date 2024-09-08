@@ -2,6 +2,10 @@
 #include <boot/multiboot.h>
 #include <mm/page.h>
 
+// FOR VBE 开启VBE测试功能
+// #define __VBE__
+
+
 //检查 multiboot flags 是否 等于 某个标志位（info）
 //若是 返回非0
 //若否 返回 0
@@ -174,6 +178,33 @@ void _init_page(uint32_t* ptd)
         PG_LAST_TABLE,/* 最后一个页表 1023代表 第1024个entry */
         NEW_L1_ENTRY(T_SELF_REF_PERM, ptd)/*将ptd起始地址。。。。(懵了)*/
     );
+
+    
+#pragma region VBE for test
+
+#ifdef __VBE__
+    uint32_t VBE_pde_index = L1_INDEX(0xFD000000);  // 内核代码的页目录索引
+    uint32_t VBE_pte_index = L2_INDEX(0xFD000000);  // 内核代码的页表索引
+    // uint32_t VBE_pg_counts = KERNEL_PAGE_COUNT;                  // kernel所占的页数
+    
+    SET_PDE(
+        ptd,
+        VBE_pde_index,                                       // 线性地址 前20位   //之所以选择在kernel_pde_index + i位置开始创建页，是为了避免今后与用户页发生冲突
+        NEW_L1_ENTRY(PG_PREM_RW, PT_ADDR(ptd, 10)) // PT_ADDR跳过0号页表，最终获得2+i即二号页表
+    )
+    for (int i = 0; i < 100; i++)
+    {
+        /* code */
+        SET_PTE(
+            ptd,
+            10,
+            VBE_pte_index,
+            NEW_L2_ENTRY(PG_PREM_RW, kernel_pm + (i << PG_SIZE_BITS)))
+    }
+#endif /* __VBE__ */
+
+#pragma endregion
+    
 }
 
 /*------------multiboot------------*/

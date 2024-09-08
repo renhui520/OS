@@ -1,3 +1,6 @@
+// 图形模式
+// #define __VBE__
+
 .section .text
     .global hhk_entry_
     hhk_entry_:
@@ -42,9 +45,13 @@
 
         sti     //开启所有中断
 
+#ifdef __VBE__
+        call    vbe_init
 
+#else
         //kernel init
         call    init
+#endif
 
 /*
 

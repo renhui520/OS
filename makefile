@@ -95,16 +95,25 @@ all: clean $(BUILD_DIR)/$(OS_ISO)
 # 快速运行 不考虑任何问题 提高优化程度
 fast-run: O := -O2
 fast-run: W := -Wall -Wextra
-fast-run: CFLAGS := -m32 -std=gnu99 -ffreestanding $(O) $(W) $(ARCH_OPT) $(NO)
+fast-run: CFLAGS := -m32 -std=gnu99 -ffreestanding $(O) $(W) $(NO)
 fast-run: ASFLAGS := -m32 -ffreestanding $(O) $(NO)
 fast-run: LDFLAGS := -m32 -ffreestanding $(O) $(NO) -nostdlib -Wl,--build-id=none
 fast-run: clean $(BUILD_DIR)/$(OS_ISO)
 fast-run: run
 
+# 快速 Debug OS 跳过严谨的代码检测
+quick-debug: O := -O0
+quick-debug: W := -Wall -Wextra
+quick-debug: CFLAGS := -m32 -std=gnu99 -ffreestanding $(O) $(W) $(DEBUG) $(NO) -D__OS_DEBUG__
+quick-debug: ASFLAGS := -m32 -ffreestanding $(O) $(DEBUG) $(NO)
+quick-debug: LDFLAGS := -m32 -ffreestanding $(O) $(NO) -nostdlib -Wl,--build-id=none
+quick-debug: clean $(BUILD_DIR)/$(OS_ISO)
+	@echo "Dumping the disassembled kernel code to $(BUILD_DIR)/kdump.txt"
+	@$(OBJDUMP) -S $(BIN_DIR)/$(OS_BIN) > $(BUILD_DIR)/kdump.txt
 
 # Debug OS
 all-debug: O := -O0
-all-debug: CFLAGS := -m32 -std=gnu99 -ffreestanding $(O) $(W) $(ARCH_OPT) $(DEBUG) $(SAFE) $(NO) -D__OS_DEBUG__
+all-debug: CFLAGS := -m32 -std=gnu99 -ffreestanding $(O) $(W) $(DEBUG) $(SAFE) $(NO) -D__OS_DEBUG__
 all-debug: ASFLAGS := -m32 -ffreestanding $(O) $(DEBUG) $(SAFE) $(NO)
 all-debug: LDFLAGS := -m32 -ffreestanding $(O) $(DEBUG) $(SAFE) $(NO) -nostdlib -Wl,--build-id=none
 
@@ -120,6 +129,14 @@ run: clean $(BUILD_DIR)/$(OS_ISO)
 	@qemu-system-i386 -cdrom $(BUILD_DIR)/$(OS_ISO) -monitor telnet::$(QEMU_MON_PORT),server,nowait &
 	@sleep 1
 	@telnet 127.0.0.1 $(QEMU_MON_PORT)
+
+quickly-debug: quick-debug
+	@$(OBJCOPY) --only-keep-debug $(BIN_DIR)/$(OS_BIN) $(BUILD_DIR)/kernel.dbg
+	@qemu-system-i386 -m 1G -rtc base=utc -s -S -cdrom $(BUILD_DIR)/$(OS_ISO) -monitor telnet::$(QEMU_MON_PORT),server,nowait &
+	@sleep 1
+	@$(QEMU_MON_TERM) -- telnet 127.0.0.1 $(QEMU_MON_PORT)
+	@gdb -s $(BUILD_DIR)/kernel.dbg -ex "target remote localhost:1234"
+
 
 # 调试 内核
 debug-qemu: all-debug

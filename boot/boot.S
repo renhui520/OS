@@ -1,11 +1,28 @@
 #define ASM_FILE        1
+
+
+// #define __VBE__         // 开启图形模式
+
+
 #include <boot/multiboot.h>
 
-#define MULTIBOOT_HEADER_FLAGS                  MULTIBOOT_MEMORY_INFO | MULTIBOOT_PAGE_ALIGN
 #define KPG_SIZE 24*1024 // 24KiB
 
-// 开启VBE
-// #define MULTIBOOT_HEADER_FLAGS                  MULTIBOOT_MEMORY_INFO | MULTIBOOT_PAGE_ALIGN | MULTIBOOT_INFO_VBE_INFO
+#ifdef __VBE__
+// MULTIBOOT_VIDEO_MODE                 开启视频模式设置
+// MULTIBOOT_INFO_VBE_INFO              返回VBE信息
+// MULTIBOOT_INFO_FRAMEBUFFER_INFO      返回视频缓冲区地址？
+#define MULTIBOOT_HEADER_FLAGS          MULTIBOOT_MEMORY_INFO | \
+                                        MULTIBOOT_PAGE_ALIGN | \
+                                        MULTIBOOT_VIDEO_MODE
+                                        //MULTIBOOT_INFO_VBE_INFO
+                                        //MULTIBOOT_INFO_FRAMEBUFFER_INFO
+#else   /* !__VBE__ */
+
+#define MULTIBOOT_HEADER_FLAGS          MULTIBOOT_MEMORY_INFO | \
+                                        MULTIBOOT_PAGE_ALIGN
+
+#endif  /* __VBE__ */
 
 /* Multiboot header. */
 /* 仅需MAGIC FLAGS CHECKSUM即可识别 */
@@ -13,6 +30,18 @@
         .long   MULTIBOOT_HEADER_MAGIC/* magic */
         .long   MULTIBOOT_HEADER_FLAGS/* flags */
         .long   CHECKSUM(MULTIBOOT_HEADER_FLAGS)/* checksum */
+#ifdef __VBE__
+        .long   0
+        .long   0
+        .long   0
+        .long   0
+        .long   0
+        .long   0       // Linear graphics please?
+        .long   1024    // Preferred width
+        .long   768     // Preferred height
+        .long   32      // Preferred pixel depth(32-bit color)
+#endif  /* __VBE__ */
+
 
 .section .bss
         .global mb_info
