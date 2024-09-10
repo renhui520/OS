@@ -192,14 +192,14 @@ void _init_page(uint32_t* ptd)
         VBE_pde_index,                                       // 线性地址 前20位   //之所以选择在kernel_pde_index + i位置开始创建页，是为了避免今后与用户页发生冲突
         NEW_L1_ENTRY(PG_PREM_RW, PT_ADDR(ptd, 10)) // PT_ADDR跳过0号页表，最终获得2+i即二号页表
     )
-    for (int i = 0; i < 100; i++)
+    for (int i = 0; i < 1000; i++)
     {
         /* code */
         SET_PTE(
             ptd,
             10,
-            VBE_pte_index,
-            NEW_L2_ENTRY(PG_PREM_RW, kernel_pm + (i << PG_SIZE_BITS)))
+            VBE_pte_index + i,
+            NEW_L2_ENTRY(PG_PREM_RW, 0xFD000000 + (i << PG_SIZE_BITS)))
     }
 #endif /* __VBE__ */
 

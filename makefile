@@ -13,8 +13,11 @@ QEMU_MON_PORT := 45454
 # 链接脚本
 LINK=link/linker.ld
 
-# 编译选项
+# 架构参数
 ARCH_OPT := -D__ARCH_IA32
+# 测试模式参数
+TEST_OPT := -D__VBE__
+# 编译选项
 O := -O0
 W := -Wall -Werror -Wextra -Wno-unknown-pragmas -Wpointer-arith -Wredundant-decls
 DEBUG := -g -fno-omit-frame-pointer
@@ -91,6 +94,13 @@ $(BUILD_DIR)/$(OS_ISO): $(ISO_DIR) $(BIN_DIR)/$(OS_BIN) GRUB_TEMPLATE
 
 all: clean $(BUILD_DIR)/$(OS_ISO)
 
+Debug:
+	@$(OBJCOPY) --only-keep-debug $(BIN_DIR)/$(OS_BIN) $(BUILD_DIR)/kernel.dbg
+	@qemu-system-i386 -m 1G -rtc base=utc -s -S -cdrom $(BUILD_DIR)/$(OS_ISO) -monitor telnet::$(QEMU_MON_PORT),server,nowait &
+	@sleep 1
+	@$(QEMU_MON_TERM) -- telnet 127.0.0.1 $(QEMU_MON_PORT)
+	@gdb -s $(BUILD_DIR)/kernel.dbg -ex "target remote localhost:1234"
+
 
 # 快速运行 不考虑任何问题 提高优化程度
 fast-run: O := -O2
@@ -101,6 +111,7 @@ fast-run: LDFLAGS := -m32 -ffreestanding $(O) $(NO) -nostdlib -Wl,--build-id=non
 fast-run: clean $(BUILD_DIR)/$(OS_ISO)
 fast-run: run
 
+
 # 快速 Debug OS 跳过严谨的代码检测
 quick-debug: O := -O0
 quick-debug: W := -Wall -Wextra
@@ -110,6 +121,27 @@ quick-debug: LDFLAGS := -m32 -ffreestanding $(O) $(NO) -nostdlib -Wl,--build-id=
 quick-debug: clean $(BUILD_DIR)/$(OS_ISO)
 	@echo "Dumping the disassembled kernel code to $(BUILD_DIR)/kdump.txt"
 	@$(OBJDUMP) -S $(BIN_DIR)/$(OS_BIN) > $(BUILD_DIR)/kdump.txt
+
+
+# 以 测试模式 运行 内核
+test: O := -O2
+test: W := -Wall -Wextra
+test: CFLAGS := -m32 -std=gnu99 -ffreestanding $(O) $(W) $(NO) $(TEST_OPT)
+test: ASFLAGS := -m32 -ffreestanding $(O) $(NO) $(TEST_OPT)
+test: LDFLAGS := -m32 -ffreestanding $(O) $(NO) -nostdlib -Wl,--build-id=none $(TEST_OPT)
+test: clean $(BUILD_DIR)/$(OS_ISO)
+test: run
+
+# 以 测试模式 Debug OS
+test-debug: O := -O0
+test-debug: W := -Wall -Wextra
+test-debug: CFLAGS := -m32 -std=gnu99 -ffreestanding $(O) $(W) $(DEBUG) $(NO) -D__OS_DEBUG__ $(TEST_OPT)
+test-debug: ASFLAGS := -m32 -ffreestanding $(O) $(DEBUG) $(NO) $(TEST_OPT)
+test-debug: LDFLAGS := -m32 -ffreestanding $(O) $(NO) -nostdlib -Wl,--build-id=none $(TEST_OPT)
+test-debug: clean $(BUILD_DIR)/$(OS_ISO) Debug
+	@echo "Dumping the disassembled kernel code to $(BUILD_DIR)/kdump.txt"
+	@$(OBJDUMP) -S $(BIN_DIR)/$(OS_BIN) > $(BUILD_DIR)/kdump.txt
+
 
 # Debug OS
 all-debug: O := -O0

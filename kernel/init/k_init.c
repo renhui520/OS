@@ -139,20 +139,60 @@ void vbe_init(void) {
     fb.bpp = _k_init_mb_info->framebuffer_bpp;
     fb.type = _k_init_mb_info->framebuffer_type;
 
+    /*
+    RGB
+    0x00ff0000 RED
+    0x0000ff00 GREEN
+    0x000000ff BLUE
+    
+    */
+
     // 绘制像素
-   //  draw_pixel(100, 100, 0xff000000, &fb); // 绘制一个蓝色像素
-   //  draw_pixel(200, 200, 0x00ff0000, &fb); // 绘制一个红色像素
-   //  draw_pixel(300, 300, 0x0000ff00, &fb); // 绘制一个绿色像素
+    for (size_t i = 0; i < 100; i++)
+    {
+      /* code */
+    draw_pixel(100+i, 100, 0x000000ff, &fb); // 绘制一个蓝色像素
+    draw_pixel(100+i, 101, 0x000000ff, &fb); // 绘制一个蓝色像素
+    draw_pixel(100+i, 102, 0x000000ff, &fb); // 绘制一个蓝色像素
+    draw_pixel(100+i, 103, 0x000000ff, &fb); // 绘制一个蓝色像素
+    draw_pixel(100+i, 104, 0x000000ff, &fb); // 绘制一个蓝色像素
+    draw_pixel(100+i, 105, 0x000000ff, &fb); // 绘制一个蓝色像素
+    }
+    
+    for (size_t i = 0; i < 100; i++)
+    {
+      /* code */
+    draw_pixel(200+i, 200, 0x00ff0000, &fb); // 绘制一个红色像素
+    draw_pixel(200+i, 201, 0x00ff0000, &fb); // 绘制一个红色像素
+    draw_pixel(200+i, 202, 0x00ff0000, &fb); // 绘制一个红色像素
+    draw_pixel(200+i, 203, 0x00ff0000, &fb); // 绘制一个红色像素
+    draw_pixel(200+i, 204, 0x00ff0000, &fb); // 绘制一个红色像素
+    draw_pixel(200+i, 205, 0x00ff0000, &fb); // 绘制一个红色像素
+    }
+    
+    for (size_t i = 0; i < 100; i++)
+    {
+      draw_pixel(300+i, 300, 0x0000ff00, &fb); // 绘制一个绿色像素
+      draw_pixel(300+i, 301, 0x0000ff00, &fb); // 绘制一个绿色像素
+      draw_pixel(300+i, 302, 0x0000ff00, &fb); // 绘制一个绿色像素
+      draw_pixel(300+i, 303, 0x0000ff00, &fb); // 绘制一个绿色像素
+      draw_pixel(300+i, 304, 0x0000ff00, &fb); // 绘制一个绿色像素
+      draw_pixel(300+i, 305, 0x0000ff00, &fb); // 绘制一个绿色像素
+      /* code */
+    }
+    
+    
    void* a = (void*)0xFD000010UL;
-   *((uint32_t*)((char*)a)) = 0xff000000;
+   // *((uint32_t*)((char*)a)) = 0xff000000;
    a = (void*)0xFD000011UL;
-   *((uint32_t*)((char*)a)) = 0x00ff0000;
+   // *((uint32_t*)((char*)a)) = 0x00ff0000;
    a = (void*)0xFD000012UL;
-   *((uint32_t*)((char*)a)) = 0x00ff0000;
+   // *((uint32_t*)((char*)a)) = 0x00ff0000;
    a = (void*)0xFD000013UL;
-   *((uint32_t*)((char*)a)) = 0x0000ff00;
-   a = (void*)0xFD000113UL;
-   
+   // *((uint32_t*)((char*)a)) = 0x0000ff00;  // 这里可以在左上角显示一个蓝色的像素 !!
+   a = (void*)0xFFFFFFFFUL;
+   // *((uint32_t *)((char *)a)) = 0x0000ff00;
+
    while(1){
 
    }
