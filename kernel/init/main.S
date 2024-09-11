@@ -46,7 +46,7 @@
         sti     //开启所有中断
 
 #ifdef __VBE__
-        call    vbe_init
+        call    vbe_main
 
 #else
         //kernel init

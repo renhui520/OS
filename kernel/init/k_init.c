@@ -106,95 +106,143 @@ void init(void)
 
 
 
-// #define __VBE__
+#define __VBE__
 
 #ifdef __VBE__
 
+   /*
+
+   RGB
+   0x00ff0000 RED
+   0x0000ff00 GREEN
+   0x000000ff BLUE
+
+   颜色格式(2种)
+   0xRRGGBB
+   0x00RRGGBB  00位用来凑数，刚好32位
+
+   RR = RED
+   GG = GREEN
+   BB = BLUE
+
+   */
+
+
+#define VBE_COLOR_REG      0x00ff0000
+#define VBE_COLOR_GREEN    0x0000ff00
+#define VBE_COLOR_BLUE     0x000000ff
+
+#define VBE_COLOR_BLACK    0x00000000
+#define VBE_COLOR_WHITE    0x00ffffff
+
+#define VBE_COLOR_YELLOW   0x00ffff00
+#define VBE_COLOR_MAGENTA  0x00ff00ff
+#define VBE_COLOR_CYAN     0x0000ffff
+
 // 图形模式 的处理？ 搞不懂，放一旁先
 // 好像还没映射内存，所以无法访问 X(
-struct framebuffer {
-    void *base;
-    uint32_t pitch;
-    uint32_t width;
-    uint32_t height;
-    uint8_t bpp;
-    uint8_t type;
+struct framebuffer
+{
+   void *base;
+   uint32_t pitch;
+   uint32_t width;
+   uint32_t height;
+   uint8_t bpp;
+   uint8_t type;
 } __attribute__((aligned(4)));
 
 // 绘制像素
-void draw_pixel(uint32_t x, uint32_t y, uint32_t color, struct framebuffer *fb) {
-    uint32_t offset = y * fb->pitch + x * (fb->bpp / 8);
-    *(uint32_t *)((char*)fb->base + offset) = color;
+void draw_pixel(uint32_t x, uint32_t y, uint32_t color, struct framebuffer *fb)
+{
+   uint32_t offset = y * fb->pitch + x * (fb->bpp / 8);
+   *(uint32_t *)((char *)fb->base + offset) = color;
 }
 
+void vbe_init(struct framebuffer *fb)
+{
+   // 获取帧缓冲区信息
+   fb->base = (void *)(uintptr_t)_k_init_mb_info->framebuffer_addr;
+   fb->pitch = _k_init_mb_info->framebuffer_pitch;
+   fb->width = _k_init_mb_info->framebuffer_width;
+   fb->height = _k_init_mb_info->framebuffer_height;
+   fb->bpp = _k_init_mb_info->framebuffer_bpp;
+   fb->type = _k_init_mb_info->framebuffer_type;
+
+}
 // 主函数
-void vbe_init(void) {
-    struct framebuffer fb;
+void vbe_main(void)
+{
+   struct framebuffer fb;
+   vbe_init(&fb);
 
-    // 获取帧缓冲区信息
-    fb.base = (void*)_k_init_mb_info->framebuffer_addr;
-    fb.pitch = _k_init_mb_info->framebuffer_pitch;
-    fb.width = _k_init_mb_info->framebuffer_width;
-    fb.height = _k_init_mb_info->framebuffer_height;
-    fb.bpp = _k_init_mb_info->framebuffer_bpp;
-    fb.type = _k_init_mb_info->framebuffer_type;
-
-    /*
-    RGB
-    0x00ff0000 RED
-    0x0000ff00 GREEN
-    0x000000ff BLUE
-    
-    */
-
-    // 绘制像素
-    for (size_t i = 0; i < 100; i++)
-    {
+   // 绘制像素
+   for (size_t i = 0; i < 100; i++)
+   {
       /* code */
-    draw_pixel(100+i, 100, 0x000000ff, &fb); // 绘制一个蓝色像素
-    draw_pixel(100+i, 101, 0x000000ff, &fb); // 绘制一个蓝色像素
-    draw_pixel(100+i, 102, 0x000000ff, &fb); // 绘制一个蓝色像素
-    draw_pixel(100+i, 103, 0x000000ff, &fb); // 绘制一个蓝色像素
-    draw_pixel(100+i, 104, 0x000000ff, &fb); // 绘制一个蓝色像素
-    draw_pixel(100+i, 105, 0x000000ff, &fb); // 绘制一个蓝色像素
-    }
-    
-    for (size_t i = 0; i < 100; i++)
-    {
-      /* code */
-    draw_pixel(200+i, 200, 0x00ff0000, &fb); // 绘制一个红色像素
-    draw_pixel(200+i, 201, 0x00ff0000, &fb); // 绘制一个红色像素
-    draw_pixel(200+i, 202, 0x00ff0000, &fb); // 绘制一个红色像素
-    draw_pixel(200+i, 203, 0x00ff0000, &fb); // 绘制一个红色像素
-    draw_pixel(200+i, 204, 0x00ff0000, &fb); // 绘制一个红色像素
-    draw_pixel(200+i, 205, 0x00ff0000, &fb); // 绘制一个红色像素
-    }
-    
-    for (size_t i = 0; i < 100; i++)
-    {
-      draw_pixel(300+i, 300, 0x0000ff00, &fb); // 绘制一个绿色像素
-      draw_pixel(300+i, 301, 0x0000ff00, &fb); // 绘制一个绿色像素
-      draw_pixel(300+i, 302, 0x0000ff00, &fb); // 绘制一个绿色像素
-      draw_pixel(300+i, 303, 0x0000ff00, &fb); // 绘制一个绿色像素
-      draw_pixel(300+i, 304, 0x0000ff00, &fb); // 绘制一个绿色像素
-      draw_pixel(300+i, 305, 0x0000ff00, &fb); // 绘制一个绿色像素
-      /* code */
-    }
-    
-    
-   void* a = (void*)0xFD000010UL;
-   // *((uint32_t*)((char*)a)) = 0xff000000;
-   a = (void*)0xFD000011UL;
-   // *((uint32_t*)((char*)a)) = 0x00ff0000;
-   a = (void*)0xFD000012UL;
-   // *((uint32_t*)((char*)a)) = 0x00ff0000;
-   a = (void*)0xFD000013UL;
-   // *((uint32_t*)((char*)a)) = 0x0000ff00;  // 这里可以在左上角显示一个蓝色的像素 !!
-   a = (void*)0xFFFFFFFFUL;
-   // *((uint32_t *)((char *)a)) = 0x0000ff00;
+      draw_pixel(100 + i, 100, VBE_COLOR_BLUE, &fb); // 绘制一个蓝色像素
+      draw_pixel(100 + i, 101, VBE_COLOR_BLUE, &fb); // 绘制一个蓝色像素
+      draw_pixel(100 + i, 102, VBE_COLOR_BLUE, &fb); // 绘制一个蓝色像素
+      draw_pixel(100 + i, 103, VBE_COLOR_BLUE, &fb); // 绘制一个蓝色像素
+      draw_pixel(100 + i, 104, VBE_COLOR_BLUE, &fb); // 绘制一个蓝色像素
+      draw_pixel(100 + i, 105, VBE_COLOR_BLUE, &fb); // 绘制一个蓝色像素
+   }
 
-   while(1){
+   for (size_t i = 0; i < 100; i++)
+   {
+      /* code */
+      draw_pixel(150 + i, 150, VBE_COLOR_YELLOW, &fb); // 绘制一个蓝色像素
+      draw_pixel(150 + i, 151, VBE_COLOR_YELLOW, &fb); // 绘制一个蓝色像素
+      draw_pixel(150 + i, 152, VBE_COLOR_YELLOW, &fb); // 绘制一个蓝色像素
+      draw_pixel(150 + i, 153, VBE_COLOR_YELLOW, &fb); // 绘制一个蓝色像素
+      draw_pixel(150 + i, 154, VBE_COLOR_YELLOW, &fb); // 绘制一个蓝色像素
+      draw_pixel(150 + i, 155, VBE_COLOR_YELLOW, &fb); // 绘制一个蓝色像素
+   }
 
+   for (size_t i = 0; i < 100; i++)
+   {
+      /* code */
+      draw_pixel(200 + i, 200, VBE_COLOR_REG, &fb); // 绘制一个红色像素
+      draw_pixel(200 + i, 201, VBE_COLOR_REG, &fb); // 绘制一个红色像素
+      draw_pixel(200 + i, 202, VBE_COLOR_REG, &fb); // 绘制一个红色像素
+      draw_pixel(200 + i, 203, VBE_COLOR_REG, &fb); // 绘制一个红色像素
+      draw_pixel(200 + i, 204, VBE_COLOR_REG, &fb); // 绘制一个红色像素
+      draw_pixel(200 + i, 205, VBE_COLOR_REG, &fb); // 绘制一个红色像素
+   }
+
+   for (size_t i = 0; i < 100; i++)
+   {
+      /* code */
+      draw_pixel(250 + i, 250, VBE_COLOR_MAGENTA, &fb); // 绘制一个红色像素
+      draw_pixel(250 + i, 251, VBE_COLOR_MAGENTA, &fb); // 绘制一个红色像素
+      draw_pixel(250 + i, 252, VBE_COLOR_MAGENTA, &fb); // 绘制一个红色像素
+      draw_pixel(250 + i, 253, VBE_COLOR_MAGENTA, &fb); // 绘制一个红色像素
+      draw_pixel(250 + i, 254, VBE_COLOR_MAGENTA, &fb); // 绘制一个红色像素
+      draw_pixel(250 + i, 255, VBE_COLOR_MAGENTA, &fb); // 绘制一个红色像素
+   }
+
+   for (size_t i = 0; i < 100; i++)
+   {
+      draw_pixel(300 + i, 300, VBE_COLOR_GREEN, &fb); // 绘制一个绿色像素
+      draw_pixel(300 + i, 301, VBE_COLOR_GREEN, &fb); // 绘制一个绿色像素
+      draw_pixel(300 + i, 302, VBE_COLOR_GREEN, &fb); // 绘制一个绿色像素
+      draw_pixel(300 + i, 303, VBE_COLOR_GREEN, &fb); // 绘制一个绿色像素
+      draw_pixel(300 + i, 304, VBE_COLOR_GREEN, &fb); // 绘制一个绿色像素
+      draw_pixel(300 + i, 305, VBE_COLOR_GREEN, &fb); // 绘制一个绿色像素
+   }
+
+   for (size_t i = 0; i < 100; i++)
+   {
+      draw_pixel(350 + i, 350, VBE_COLOR_WHITE, &fb); // 绘制一个绿色像素
+      draw_pixel(350 + i, 351, VBE_COLOR_WHITE, &fb); // 绘制一个绿色像素
+      draw_pixel(350 + i, 352, VBE_COLOR_WHITE, &fb); // 绘制一个绿色像素
+      draw_pixel(350 + i, 353, VBE_COLOR_WHITE, &fb); // 绘制一个绿色像素
+      draw_pixel(350 + i, 354, VBE_COLOR_WHITE, &fb); // 绘制一个绿色像素
+      draw_pixel(350 + i, 355, VBE_COLOR_WHITE, &fb); // 绘制一个绿色像素
+                                                 /* code */
+   }
+
+   while (1)
+   {
    }
 }
 #endif
