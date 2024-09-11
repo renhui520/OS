@@ -106,7 +106,7 @@ void init(void)
 
 
 
-#define __VBE__
+// #define __VBE__
 
 #ifdef __VBE__
 
