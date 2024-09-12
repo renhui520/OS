@@ -17,6 +17,19 @@ void* memcpy(void* dest, const void* src, size_t num)
 {
     uint8_t* dest_ptr = (uint8_t*)dest;
     const uint8_t* src_ptr = (const uint8_t*)src;
+    if (((uintptr_t) dest & 0x3) == 0 && ((uintptr_t) src & 0x3) == 0) // 对齐
+    {
+        while (num >= 4)
+        {
+            *(dest_ptr++) = *(src_ptr++);
+            *(dest_ptr++) = *(src_ptr++);
+            *(dest_ptr++) = *(src_ptr++);
+            *(dest_ptr++) = *(src_ptr++);
+            num -= 4;
+        }
+        
+    }
+    
     while (num--)
     {
         *(dest_ptr++) = *(src_ptr++);
@@ -38,11 +51,37 @@ void* memmove(void* dest, const void* src, size_t num)
     {
         dest_ptr += num - 1;
         src_ptr += num - 1;
+        if (((uintptr_t)dest_ptr & 0x3) == 0 && ((uintptr_t)src_ptr & 0x3) == 0)
+        {
+            // 如果指针对齐，则逐块复制
+            while (num >= 4)
+            {
+                *dest_ptr-- = *src_ptr--;
+                *dest_ptr-- = *src_ptr--;
+                *dest_ptr-- = *src_ptr--;
+                *dest_ptr-- = *src_ptr--;
+                num -= 4;
+            }
+        }
+
         while (num--)
         {
             *(dest_ptr--) = *(src_ptr--);
         } 
     } else {
+        if (((uintptr_t)dest_ptr & 0x3) == 0 && ((uintptr_t)src_ptr & 0x3) == 0)
+        {
+            // 如果指针对齐，则逐块复制
+            while (num >= 4)
+            {
+                *dest_ptr++ = *src_ptr++;
+                *dest_ptr++ = *src_ptr++;
+                *dest_ptr++ = *src_ptr++;
+                *dest_ptr++ = *src_ptr++;
+                num -= 4;
+            }
+        }
+
         while (num--)
         {
             *(dest_ptr++) = *(src_ptr++);
@@ -52,6 +91,11 @@ void* memmove(void* dest, const void* src, size_t num)
 }
 void* memset(void* ptr, int value, size_t num)
 {
+    if (num == 0)
+    {
+        return ptr;
+    }
+    
     uint8_t* c_ptr = (uint8_t*)ptr;
     for (size_t i = 0; i < num; i++)
     {
