@@ -130,6 +130,9 @@ void init(void)
 
    */
 
+#define VBE_WIDTH 1024
+#define VBE_HEIGHT 768
+#define VBE_BPP 32   //??
 
 #define VBE_COLOR_RED      0x00ff0000
 #define VBE_COLOR_GREEN    0x0000ff00
@@ -157,10 +160,10 @@ struct framebuffer
 struct framebuffer fb;
 
 // 绘制像素
-void draw_pixel(uint32_t x, uint32_t y, uint32_t color, struct framebuffer *fb)
+void draw_pixel(uint16_t x, uint16_t y, uint32_t color)
 {
-   uint32_t offset = y * fb->pitch + (x * (fb->bpp / 8));
-   *(uint32_t *)((char *)fb->base + offset) = color;
+   uint32_t offset = y * fb.pitch + (x * (fb.bpp / 8));
+   *(uint32_t *)((char *)fb.base + offset) = color;
 }
 
 // 绘画一行，但是memset只能处理uint8_t的类型，uint32_t类型数据只能写入开头的0，很麻烦，得重新写一个专门的程序
@@ -170,7 +173,7 @@ void draw_pixel(uint32_t x, uint32_t y, uint32_t color, struct framebuffer *fb)
 //    memset((void*)fb->base + offset, color, fb->width * (fb->bpp / 8));
 // }
 
-void draw_line(uint32_t x, uint32_t y, uint32_t color, uint32_t width)
+void draw_line(uint16_t x, uint16_t y, uint16_t width, uint32_t color)
 {
    uint32_t offset = y * fb.pitch + (x * (fb.bpp / 8));
    for (size_t i = 0; i < width; i++)
@@ -200,13 +203,35 @@ void draw_line(uint32_t x, uint32_t y, uint32_t color, uint32_t width)
 // }
 
 
-void draw_box(uint32_t x, uint32_t y, uint32_t width, uint32_t height, uint32_t color)
+void draw_box(uint16_t x, uint16_t y, uint16_t width, uint16_t height, uint32_t color)
 {
-   uint32_t offset = y * fb.pitch + (x * (fb.bpp / 8));
-   for (size_t i = 0; i < height; i++)
+   for (uint16_t i = 0; i < height; i++)
    {
-      draw_line(x, y + i, color, width);
+      draw_line(x, y + i, width, color);
    }
+}
+
+void draw_framebox(uint16_t x, uint16_t y, uint16_t width, uint16_t height, uint16_t border_width, uint32_t color)
+{
+   for (uint16_t i = 0; i < border_width; i++)
+   {
+      // 顶部
+      draw_line(x, y + i, width, color);
+      // 底部
+      draw_line(x, y + height - 1 - border_width + i, width, color);
+   }
+   for (uint16_t i = 0; i < height - 2 * border_width; i++)
+   {
+      for (uint16_t j = 0; j < border_width; j++)
+      {
+         // 左侧
+         draw_pixel(x + j, y + border_width + i, color);
+         // 右侧
+         draw_pixel((x + width - border_width) + j, y + border_width + i, color);
+      }
+   }
+   
+   
 }
 
 void vbe_init()
@@ -225,84 +250,6 @@ void vbe_main(void)
 {
    vbe_init();
 
-   // 绘制像素
-   // for (size_t i = 0; i < 100; i++)
-   // {
-   //    /* code */
-   //    draw_pixel(100 + i, 100, VBE_COLOR_BLUE, &fb); // 绘制一个蓝色像素
-   //    draw_pixel(100 + i, 101, VBE_COLOR_BLUE, &fb); // 绘制一个蓝色像素
-   //    draw_pixel(100 + i, 102, VBE_COLOR_BLUE, &fb); // 绘制一个蓝色像素
-   //    draw_pixel(100 + i, 103, VBE_COLOR_BLUE, &fb); // 绘制一个蓝色像素
-   //    draw_pixel(100 + i, 104, VBE_COLOR_BLUE, &fb); // 绘制一个蓝色像素
-   //    draw_pixel(100 + i, 105, VBE_COLOR_BLUE, &fb); // 绘制一个蓝色像素
-   // }
-
-   // for (size_t i = 0; i < 100; i++)
-   // {
-   //    /* code */
-   //    draw_pixel(150 + i, 150, VBE_COLOR_YELLOW, &fb); // 绘制一个蓝色像素
-   //    draw_pixel(150 + i, 151, VBE_COLOR_YELLOW, &fb); // 绘制一个蓝色像素
-   //    draw_pixel(150 + i, 152, VBE_COLOR_YELLOW, &fb); // 绘制一个蓝色像素
-   //    draw_pixel(150 + i, 153, VBE_COLOR_YELLOW, &fb); // 绘制一个蓝色像素
-   //    draw_pixel(150 + i, 154, VBE_COLOR_YELLOW, &fb); // 绘制一个蓝色像素
-   //    draw_pixel(150 + i, 155, VBE_COLOR_YELLOW, &fb); // 绘制一个蓝色像素
-   // }
-
-   // for (size_t i = 0; i < 100; i++)
-   // {
-   //    /* code */
-   //    draw_pixel(200 + i, 200, VBE_COLOR_RED, &fb); // 绘制一个红色像素
-   //    draw_pixel(200 + i, 201, VBE_COLOR_RED, &fb); // 绘制一个红色像素
-   //    draw_pixel(200 + i, 202, VBE_COLOR_RED, &fb); // 绘制一个红色像素
-   //    draw_pixel(200 + i, 203, VBE_COLOR_RED, &fb); // 绘制一个红色像素
-   //    draw_pixel(200 + i, 204, VBE_COLOR_RED, &fb); // 绘制一个红色像素
-   //    draw_pixel(200 + i, 205, VBE_COLOR_RED, &fb); // 绘制一个红色像素
-   // }
-
-   // for (size_t i = 0; i < 100; i++)
-   // {
-   //    /* code */
-   //    draw_pixel(250 + i, 250, VBE_COLOR_MAGENTA, &fb); // 绘制一个红色像素
-   //    draw_pixel(250 + i, 251, VBE_COLOR_MAGENTA, &fb); // 绘制一个红色像素
-   //    draw_pixel(250 + i, 252, VBE_COLOR_MAGENTA, &fb); // 绘制一个红色像素
-   //    draw_pixel(250 + i, 253, VBE_COLOR_MAGENTA, &fb); // 绘制一个红色像素
-   //    draw_pixel(250 + i, 254, VBE_COLOR_MAGENTA, &fb); // 绘制一个红色像素
-   //    draw_pixel(250 + i, 255, VBE_COLOR_MAGENTA, &fb); // 绘制一个红色像素
-   // }
-
-   // for (size_t i = 0; i < 100; i++)
-   // {
-   //    draw_pixel(300 + i, 300, VBE_COLOR_GREEN, &fb); // 绘制一个绿色像素
-   //    draw_pixel(300 + i, 301, VBE_COLOR_GREEN, &fb); // 绘制一个绿色像素
-   //    draw_pixel(300 + i, 302, VBE_COLOR_GREEN, &fb); // 绘制一个绿色像素
-   //    draw_pixel(300 + i, 303, VBE_COLOR_GREEN, &fb); // 绘制一个绿色像素
-   //    draw_pixel(300 + i, 304, VBE_COLOR_GREEN, &fb); // 绘制一个绿色像素
-   //    draw_pixel(300 + i, 305, VBE_COLOR_GREEN, &fb); // 绘制一个绿色像素
-   // }
-
-   // for (size_t i = 0; i < 100; i++)
-   // {
-   //    draw_pixel(350 + i, 350, VBE_COLOR_WHITE, &fb); // 绘制一个绿色像素
-   //    draw_pixel(350 + i, 351, VBE_COLOR_WHITE, &fb); // 绘制一个绿色像素
-   //    draw_pixel(350 + i, 352, VBE_COLOR_WHITE, &fb); // 绘制一个绿色像素
-   //    draw_pixel(350 + i, 353, VBE_COLOR_WHITE, &fb); // 绘制一个绿色像素
-   //    draw_pixel(350 + i, 354, VBE_COLOR_WHITE, &fb); // 绘制一个绿色像素
-   //    draw_pixel(350 + i, 355, VBE_COLOR_WHITE, &fb); // 绘制一个绿色像素
-   //                                               /* code */
-   // }
-
-   // for (size_t i = 0; i < 300; i++)
-   // {
-   //    draw_line(0, 0 + i, VBE_COLOR_BLUE, fb.width);
-   // }
-
-   // for (size_t i = 0; i < 300; i++)
-   // {
-   //    draw_line(0, 300 + i, VBE_COLOR_YELLOW, fb.width);
-   // }
-
-   // draw_pixel(400, 401, VBE_COLOR_RED, &fb);
-
    draw_box(50, 50, 100, 100, VBE_COLOR_RED);
    draw_box(160, 50, 100, 100, VBE_COLOR_BLUE);
    draw_box(160, 160, 100, 100, VBE_COLOR_GREEN);
@@ -313,7 +260,10 @@ void vbe_main(void)
    draw_box(660, 160, 100, 100, VBE_COLOR_GREEN);
    draw_box(550, 160, 100, 100, VBE_COLOR_YELLOW);
 
-   draw_line(140, 300, VBE_COLOR_CYAN,400);
+   draw_line(140, 300, 400, VBE_COLOR_CYAN);
+
+   // 画一个 矩形边框
+   draw_framebox(5, 5, VBE_WIDTH - 10, VBE_HEIGHT - 10, 5, VBE_COLOR_GREEN);
    while (1)
    {
    }

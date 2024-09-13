@@ -13,6 +13,8 @@ int memcmp(const void* dest, const void* src, size_t num)
     }
     return 0; 
 }
+
+// 可能不够完整，不够安全?
 void* memcpy(void* dest, const void* src, size_t num)
 {
     uint8_t* dest_ptr = (uint8_t*)dest;
@@ -45,7 +47,7 @@ void* memmove(void* dest, const void* src, size_t num)
     {
         return dest;
     }
-    
+
     //dest_ptr < (src_ptr + num)判断是否重叠
     if (dest_ptr > src_ptr && dest_ptr < (src_ptr + num))
     {
