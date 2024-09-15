@@ -14,7 +14,7 @@
 
 #define HIGHER_HLF_BASE 0xC0000000UL
 #define P2V(paddr)          ((uintptr_t)(paddr)  +  HIGHER_HLF_BASE)    // 将 物理地址 转换为 虚拟地址
-#define V2P(vaddr)          ((uintptr_t)(vaddr)  -  HIGHER_HLF_BASE)    // 将 虚拟地址 转换为 物理地址
+#define V2P(vaddr)          ((uintptr_t)(vaddr)  -  HIGHER_HLF_BASE)    // 将 虚拟地址(高半核虚拟地址) 转换为 物理地址(实际所处的低半核地址)
 
 //0xFFFFF000UL在二进制表示中为 1111111111111111111111111111111100000000
 //最高20位保持不变 最低12位被清零   4KB对齐?
@@ -124,5 +124,23 @@ typedef unsigned long ptd_t;
 typedef unsigned long pt_t;
 typedef unsigned int pt_attr;
 
+/**
+ * @brief 虚拟映射属性
+ * 
+ */
+typedef struct {
+    // 物理页码（如果不存在映射，则为0）
+    uint32_t pn;
+    // 物理页地址（如果不存在映射，则为0）
+    uintptr_t pa;
+    // 映射的flags
+    uint16_t flags;
+} v_mapping;
+
+typedef uint32_t x86_pte_t;
+typedef struct
+{
+    x86_pte_t entry[PG_MAX_ENTRIES]; // "页表"数组 也就是 页表 页表中保存了页表项PTE PTE指向物理页
+} __attribute__((packed)) x86_page_table;
 
 #endif

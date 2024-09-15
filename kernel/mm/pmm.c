@@ -34,6 +34,9 @@ size_t pg_lookup_ptr;   // 指向 正在管理的页面
 uint8_t bitmap[PM_BMP_MAX_SIZE];    // 位图
 
 
+// 初始化 最大页
+// 位图[已占用]
+// 和LOOKUP_START 指向
 void pmm_init(uintptr_t mem_upper_lim)
 {
     max_pg = (PG_ALIGN(mem_upper_lim) >> 12);   // PG_ALIGN(mem_upper_lim) >> 10 ==> KiB --> '>>' 2 ==> / 4
@@ -143,7 +146,7 @@ void* pmm_alloc_page(void)
     while (!suitable_page && pg_lookup_ptr < upper_lim)
     {
         // 每 8 位 为 1 chunk
-        chunk = bitmap[pg_lookup_ptr >> 3]; // ">> 3" ==> "/ 8"
+        chunk = bitmap[pg_lookup_ptr >> 3]; // ">> 3" ==> "/ 8"     计算所在chunk
 
         // 如果整个 块 为“全满”！
         if (chunk == 0xFFU)

@@ -18,6 +18,16 @@
 #define MEM_1MB 0x100000
 
 
+extern uint8_t __kernel_start;
+extern uint8_t __kernel_end;
+extern uint8_t __init_hhk_end;
+
+#define VGA_BUFFER_VADDR    0xB0000000UL
+#define VGA_BUFFER_PADDR    0xB8000UL
+#define VGA_BUFFER_SIZE     4096
+
+
+
 // multiboot用于与grub交互
 multiboot_info_t* _k_init_mb_info;
 
@@ -55,6 +65,8 @@ void init(void)
 
    kprintf(KINIT "pmm(Phyisic Memory Manager) initializing...\n");
    kprintf(KINIT "Marking all memory as used...\n");
+
+   // 所有页 [已占用]
    pmm_init(MEM_1MB + (_k_init_mb_info->mem_upper << 10));
    kprintf(KINIT "pmm initialized.\n");
 
@@ -63,9 +75,21 @@ void init(void)
    kprintf(KINIT "vmm initialized.\n");
    
    kprintf(KINIT "Memory Manager initialized.\n");
-   
+
+   /*--------------------------------------------*/
+
+   kprintf(KINIT "Setting up memory...\n");
+
+   // 计算 位图 大小
+   unsigned int map_size = _k_init_mb_info->mmap_length / sizeof(multiboot_memory_map_t);
+
+   // 按照 Memory map 标识可用的物理页
+   setup_memory((multiboot_memory_map_t *)_k_init_mb_info->mmap_addr, map_size);
+
+   kprintf(KINIT "Done ! \n");
+
 #pragma endregion   
-   
+
    // kprintf("MEM_UPPER: %d  Byte\n", _k_init_mb_info->mem_upper << 10);
  
    // 检测是否开启VBE
@@ -83,7 +107,7 @@ void init(void)
    }
    if (_k_init_mb_info->flags & MULTIBOOT_INFO_FRAMEBUFFER_INFO)
    {
-      kprintf("Frame Buffer_addr: %d\n", _k_init_mb_info->framebuffer_addr);
+      kprintf("Frame Buffer_addr: 0x%x\n", _k_init_mb_info->framebuffer_addr);
       kprintf("Frame Buffer width: %d\n", _k_init_mb_info->framebuffer_width);
       kprintf("Frame Buffer height: %d\n", _k_init_mb_info->framebuffer_height);
       if (_k_init_mb_info->framebuffer_addr == 0xb8000UL)
@@ -92,7 +116,7 @@ void init(void)
       }
       
    }
-   
+
 
 
    // for (int i = 0; i < 2; i++)
@@ -107,7 +131,67 @@ void init(void)
 }
 
 
+//    完全没看过...
+void setup_memory(multiboot_memory_map_t *map, size_t map_size)
+{
 
+   // First pass, to mark the physical pages
+   for (unsigned int i = 0; i < map_size; i++)
+   {
+      multiboot_memory_map_t mmap = map[i];
+      kprintf("[MM] Base: 0x%x, len: %u KiB, type: %u\n",
+              map[i].addr,      // 内存区域的起始地址
+              map[i].len >> 10, // 字节 转化为 KiB
+              map[i].type);         // 内存区域类型 也就是分页属性:
+                            // 例如 MULTIBOOT_MEMORY_AVAILABLE
+
+      // 标记 内存 为 可用
+      if (mmap.type == MULTIBOOT_MEMORY_AVAILABLE)
+      {
+         // 整数向上取整除法
+         uintptr_t pg = map[i].addr + 0x0fffU;
+
+         // pg >> PG_SIZE_BITS 计算起始页数
+         // map[i].len_low >> PG_SIZE_BITS 计算所占页数
+         // 连续标记多个页为可用
+         pmm_mark_chunk_free(pg >> PG_SIZE_BITS, map[i].len >> PG_SIZE_BITS);
+         kprintf(KINFO "[MM] Freed %u pages start from 0x%x\n",
+                 map[i].len >> PG_SIZE_BITS, // 计算页数，因为1页=4KiB=(1<<12)字节
+                 pg & ~0x0fffU);                 // 进行掩码操作保证地址是对齐到页面大小 (4KiB) 的
+      }
+   }
+
+   // 将内核占据的页，包括前1MB，hhk_init 设为已占用
+   size_t pg_count = V2P(&__kernel_end) >> PG_SIZE_BITS;             // 虚拟内存 ==> 物理内存 并计算占用页数
+   pmm_mark_chunk_occupied(0, pg_count);                             // 连续标记多个页 [已占用]
+   kprintf(KINFO "[MM] Allocated %d pages for kernel.\n", pg_count); // 输出 [已占用] 页数
+
+   size_t vga_buf_pgs = VGA_BUFFER_SIZE >> PG_SIZE_BITS; // 计算 VGA 缓冲区 页数
+
+   // 首先，标记VGA部分为已占用
+   // VGA_BUFFER_PADDR >> PG_SIZE_BITS 计算页数
+   pmm_mark_chunk_occupied(VGA_BUFFER_PADDR >> PG_SIZE_BITS, vga_buf_pgs); // 连续标记多个 "VGA缓冲区" 页 [已占用]
+
+   // 重映射VGA文本缓冲区（以后会变成显存，i.e., framebuffer）
+   for (size_t i = 0; i < vga_buf_pgs; i++)
+   {
+      // i << PG_SIZE_BITS 实际上应该和 VGA_BUFFER_PADDR 一致
+      // 因为 i = vga_buf_pgs, vga_buf_pgs = VGA_BUFFER_SIZE >> PG_SIZE_BITS
+      // 所以 i = VGA_BUFFER_PADDR >> PG_SIZE_BITS
+      // 所以 i << PG_SIZE_BITS = VGA_BUFFER_PADDR
+      vmm_map_page(                                         // 将 虚拟地址 与 物理地址 建立映射关系
+          (void *)(VGA_BUFFER_VADDR + (i << PG_SIZE_BITS)), // 虚拟地址    循环映射多个4KiB页表
+          (void *)(VGA_BUFFER_PADDR + (i << PG_SIZE_BITS)), // 物理地址
+          PG_PREM_RW                                        // 页属性 [可读写]
+      );
+   }
+
+   // 更新VGA缓冲区位置至虚拟地址
+   tty_init((void *)VGA_BUFFER_VADDR);
+   // tty_init((void *)VGA_BUFFER_PADDR);    // 不能访问了？
+
+   kprintf(KINFO "[MM] Mapped VGA to %p.\n", VGA_BUFFER_VADDR);
+}
 
 // #define __VBE__
 

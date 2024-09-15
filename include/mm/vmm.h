@@ -6,5 +6,6 @@
 
 void vmm_init(void);
 
+void* vmm_map_page(void* va, void* pa, pt_attr tattr);
 
 #endif
