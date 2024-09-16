@@ -5,7 +5,7 @@
 #include <libc/stdlib.h>
 
 // char base_char[] = "0123456789abcdefghijklmnopqrstuvwxyz";
-// char* __uitoa_internal(unsigned int value, char* str, int base, unsigned int* size)
+// char* __uitoa_internal(unsigned long value, char* str, int base, unsigned int* size)
 // {
 //     unsigned int ptr = 0;
 //     do {
@@ -26,31 +26,63 @@
 //     return str;
 // }
 
-
+// 这种似乎解决了之前遇到的转换问题...
 char* __uitoa_internal(unsigned long value, char* str, int base, unsigned int* size)
-{ 
+{
     unsigned int ptr = 0;
     do {
-        str[ptr] = '0' + (value % base);
+        int digit = value % base;
+        if (digit < 10) {
+            str[ptr] = '0' + digit;
+        } else {
+            // 十六进制的处理？
+            str[ptr] = 'a' + (digit - 10);  // 或者使用 'A' + (digit - 10) 以大写字母表示
+        }
         value /= base;
         ptr++;
     } while (value);
 
-    for (unsigned int i = 0; i < (ptr >> 1); i++)
-    {
+    for (unsigned int i = 0; i < (ptr >> 1); i++) {
         str[i] ^= str[ptr - i - 1];
         str[ptr - i - 1] ^= str[i];
         str[i] ^= str[ptr - i - 1];
     }
-     
+
     str[ptr] = '\0';
 
-    if (size)
-    {
+    if (size) {
         *size = ptr;
     }
     return str;
 }
+
+
+// 会出现将相关数据转换错误的情况!好像是如果大于10的基数就会出现问题，例如16进制
+
+// char* __uitoa_internal(unsigned long value, char* str, int base, unsigned int* size)
+// { 
+//     unsigned int ptr = 0;
+//     do {
+//         str[ptr] = '0' + (value % base);
+//         value /= base;
+//         ptr++;
+//     } while (value);
+
+//     for (unsigned int i = 0; i < (ptr >> 1); i++)
+//     {
+//         str[i] ^= str[ptr - i - 1];
+//         str[ptr - i - 1] ^= str[i];
+//         str[i] ^= str[ptr - i - 1];
+//     }
+     
+//     str[ptr] = '\0';
+
+//     if (size)
+//     {
+//         *size = ptr;
+//     }
+//     return str;
+// }
 
 char* __itoa_internal(long value, char* str, int base, unsigned int* size)
 {

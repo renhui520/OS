@@ -34,7 +34,7 @@ int __vmm_map_internal(uint32_t l1_index,
         }
 
         // 往页目录 中的 第l1_index页表位置 注册 一个新的页表
-        l1_ptd->entry[l1_index] = NEW_L1_ENTRY(attr, V2P(new_l1pt_pa));
+        l1_ptd->entry[l1_index] = NEW_L1_ENTRY(attr, new_l1pt_pa);
 
         // 设置 l1_index页目录项 指向的页表的 页表项 为 0
         memset((void *)L2_VADDR(l1_index), 0, PG_SIZE);
@@ -129,3 +129,4 @@ void* vmm_map_page(void* va, void* pa, pt_attr tattr)
     return (void*)V_ADDR(l1_index, l2_index, PG_OFFSET(va));
 }
 
+void vmm_unmap_page(void* va);

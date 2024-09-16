@@ -32,7 +32,7 @@ void __kprintf(const char* component, const char* fmt, va_list args)
         break;
     case '2':
         tty_set_theme(VGA_COLOR_LIGHT_RED, theme >> 12);
-        snprintf(expanded_fmt, 1024, "[%s] (%s) %s", "EROR", component, fmt);
+        snprintf(expanded_fmt, 1024, "[%s] (%s) %s", "ERROR", component, fmt);
         break;
     case '3':
         tty_set_theme(VGA_COLOR_BROWN, theme >> 12);

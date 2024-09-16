@@ -27,6 +27,13 @@ extern uint8_t __init_hhk_end;
 #define VGA_BUFFER_SIZE     4096
 
 
+/*
+   
+   TODO: 1. 完成vmm_unmap_page
+         2. 取消之前的1MiB空间映射
+
+*/
+
 
 // multiboot用于与grub交互
 multiboot_info_t* _k_init_mb_info;
@@ -36,6 +43,9 @@ multiboot_info_t* _k_init_mb_info;
 // KINFO KWARN KERROR 作为LOG等级参数
 // kprintf(KINFO "awa");
 LOG_MODULE("OS")
+
+// 内存管理 映射 初始化？
+void setup_memory(multiboot_memory_map_t *map, size_t map_size);
 
 void init(void)
 {
@@ -86,7 +96,9 @@ void init(void)
    // 按照 Memory map 标识可用的物理页
    setup_memory((multiboot_memory_map_t *)_k_init_mb_info->mmap_addr, map_size);
 
-   kprintf(KINIT "Done ! \n");
+   kprintf(KINIT "Done ! \n\n");
+
+   tty_put_str("================================================================================\n\n");
 
 #pragma endregion   
 
@@ -117,8 +129,6 @@ void init(void)
       
    }
 
-
-
    // for (int i = 0; i < 2; i++)
    // {
    //    kprintf("Hello Wolrd!!!Hello Everyone! Times: %d\n", i+1);
@@ -129,9 +139,6 @@ void init(void)
    // 触发 1 / 0 异常   这样可以
    // __asm__("int $0");
 }
-
-
-//    完全没看过...
 void setup_memory(multiboot_memory_map_t *map, size_t map_size)
 {
 
@@ -188,7 +195,7 @@ void setup_memory(multiboot_memory_map_t *map, size_t map_size)
 
    // 更新VGA缓冲区位置至虚拟地址
    tty_init((void *)VGA_BUFFER_VADDR);
-   // tty_init((void *)VGA_BUFFER_PADDR);    // 不能访问了？
+   // tty_init((void *)VGA_BUFFER_PADDR);    // 仍然能通过这个访问   但是后面会将这部分映射删除，所以今后可能访问不了
 
    kprintf(KINFO "[MM] Mapped VGA to %p.\n", VGA_BUFFER_VADDR);
 }
