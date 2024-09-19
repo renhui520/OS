@@ -1,5 +1,7 @@
 #include <mm/vmm.h>
 
+#include <hal/cpu.h>
+
 #include <libc/string.h>
 
 #define true 1
@@ -129,4 +131,120 @@ void* vmm_map_page(void* va, void* pa, pt_attr tattr)
     return (void*)V_ADDR(l1_index, l2_index, PG_OFFSET(va));
 }
 
-void vmm_unmap_page(void* va);
+void*
+vmm_fmap_page(void* va, void* pa, pt_attr tattr)
+{
+    if (!pa || !va) {
+        return NULL;
+    }
+
+    // assert(((uintptr_t)va & 0xFFFU) == 0) assert(((uintptr_t)pa & 0xFFFU) == 0);
+
+    uint32_t l1_index = L1_INDEX(va);
+    uint32_t l2_index = L2_INDEX(va);
+
+    if (!__vmm_map_internal(l1_index, l2_index, (uintptr_t)pa, tattr, true)) {
+        return NULL;
+    }
+
+    cpu_invplg(va);
+
+    return (void*)V_ADDR(l1_index, l2_index, PG_OFFSET(va));
+}
+
+/*-------------------------------------------------------*/
+
+// 立刻 为给定的 虚拟页 分配一个可用的 物理页
+void* vmm_alloc_page(void* vpn, pt_attr tattr)
+{
+    void* pp = pmm_alloc_page();
+    void* result = vmm_map_page(vpn, pp, tattr);
+    if (!result) {
+        pmm_free_page(pp);
+    }
+    return result;
+}
+
+// 分配多个连续的 虚拟页
+int
+vmm_alloc_pages(void* va, size_t sz, pt_attr tattr)
+{
+    // assert((uintptr_t)va % PG_SIZE == 0) assert(sz % PG_SIZE == 0);
+
+    void* va_ = va;
+    for (size_t i = 0; i < (sz >> PG_SIZE_BITS); i++, va_ = (void*)((uintptr_t)va_ + PG_SIZE)) {
+        void* pp = pmm_alloc_page();
+        uint32_t l1_index = L1_INDEX(va_);
+        uint32_t l2_index = L2_INDEX(va_);
+        if (!pp || !__vmm_map_internal(
+                     l1_index, l2_index, (uintptr_t)pp, tattr, false)) {
+            // if one failed, release previous allocated pages.
+            va_ = va;
+            for (size_t j = 0; j < i; j++, va_ = (void*)((uintptr_t)va_ + PG_SIZE)) {
+                vmm_unmap_page(va_);
+            }
+
+            return false;
+        }
+    }
+
+    return true;
+}
+
+/*-------------------------------------------------------*/
+
+//若映射不存在则设置新的映射，否则忽略操作
+/*
+似乎和
+vmm_map_page
+vmm_fmap_page
+的实现效果是一样的，只不过是不同方式
+
+fmap是强制
+set和map是非强制
+*/
+void vmm_set_mapping(void* va, void* pa, pt_attr attr) {
+    // assert(((uintptr_t)va & 0xFFFU) == 0);
+
+    uint32_t l1_index = L1_INDEX(va);
+    uint32_t l2_index = L2_INDEX(va);
+
+    // 如果等于最后一页，即 页目录. 则直接返回
+    if (l1_index == 1023) {
+        return;
+    }
+    
+    __vmm_map_internal(l1_index, l2_index, (uintptr_t)pa, attr, false);
+}
+
+// 取消 虚拟页的映射
+void vmm_unmap_page(void* va)
+{
+    uint32_t l1_index = L1_INDEX(va);
+    uint32_t l2_index = L2_INDEX(va);
+
+    if (l1_index == 1023)
+    {
+        return;
+    }
+
+
+    x86_page_table* l1_pt = (x86_page_table*)L1_BASE_VADDR;
+    x86_pte_t l1_pte = l1_pt->entry[l1_index];
+    
+    if (l1_pte)
+    {
+        x86_page_table* l2_pt = (x86_page_table*)L2_VADDR(l1_index);
+        x86_pte_t l2_pte = l2_pt->entry[l2_index];
+
+        // 检测页是否被 映射?
+        if (IS_CACHED(l2_pte))
+        {
+            pmm_free_page((void*)l2_pte);   // 释放掉已占用的页
+        }
+
+        // 使 相应页表的 TLB 无效
+        cpu_invplg(va);
+        l2_pt->entry[l2_index] = 0;     // 使其指向 空 指针位
+    }
+}

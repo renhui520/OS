@@ -29,7 +29,7 @@ extern uint8_t __init_hhk_end;
 
 /*
    
-   TODO: 1. 完成vmm_unmap_page
+   TODO: 
          2. 取消之前的1MiB空间映射
 
 */
@@ -96,9 +96,9 @@ void init(void)
    // 按照 Memory map 标识可用的物理页
    setup_memory((multiboot_memory_map_t *)_k_init_mb_info->mmap_addr, map_size);
 
-   kprintf(KINIT "Done ! \n\n");
+   kprintf(KINIT "Done ! \n");
 
-   tty_put_str("================================================================================\n\n");
+   tty_put_str("================================================================================\n");
 
 #pragma endregion   
 
@@ -162,7 +162,7 @@ void setup_memory(multiboot_memory_map_t *map, size_t map_size)
          // map[i].len_low >> PG_SIZE_BITS 计算所占页数
          // 连续标记多个页为可用
          pmm_mark_chunk_free(pg >> PG_SIZE_BITS, map[i].len >> PG_SIZE_BITS);
-         kprintf(KINFO "[MM] Freed %u pages start from 0x%x\n",
+         kprintf(KLOG "[MM] Freed %u pages start from 0x%x\n",
                  map[i].len >> PG_SIZE_BITS, // 计算页数，因为1页=4KiB=(1<<12)字节
                  pg & ~0x0fffU);                 // 进行掩码操作保证地址是对齐到页面大小 (4KiB) 的
       }
@@ -171,7 +171,7 @@ void setup_memory(multiboot_memory_map_t *map, size_t map_size)
    // 将内核占据的页，包括前1MB，hhk_init 设为已占用
    size_t pg_count = V2P(&__kernel_end) >> PG_SIZE_BITS;             // 虚拟内存 ==> 物理内存 并计算占用页数
    pmm_mark_chunk_occupied(0, pg_count);                             // 连续标记多个页 [已占用]
-   kprintf(KINFO "[MM] Allocated %d pages for kernel.\n", pg_count); // 输出 [已占用] 页数
+   kprintf(KLOG "[MM] Allocated %d pages for kernel.\n", pg_count); // 输出 [已占用] 页数
 
    size_t vga_buf_pgs = VGA_BUFFER_SIZE >> PG_SIZE_BITS; // 计算 VGA 缓冲区 页数
 
@@ -193,11 +193,14 @@ void setup_memory(multiboot_memory_map_t *map, size_t map_size)
       );
    }
 
+
+   // WARN!!!!!      运行到vmm_map_page这里会强制重启！gdb下似乎会导致l2pte访问失败？???
+
    // 更新VGA缓冲区位置至虚拟地址
    tty_init((void *)VGA_BUFFER_VADDR);
    // tty_init((void *)VGA_BUFFER_PADDR);    // 仍然能通过这个访问   但是后面会将这部分映射删除，所以今后可能访问不了
 
-   kprintf(KINFO "[MM] Mapped VGA to %p.\n", VGA_BUFFER_VADDR);
+   kprintf(KLOG "[MM] Mapped VGA to %p.\n", VGA_BUFFER_VADDR);
 }
 
 // #define __VBE__

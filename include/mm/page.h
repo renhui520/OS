@@ -1,5 +1,5 @@
-#ifndef __AWA_PAGE_H
-#define __AWA_PAGE_H
+#ifndef __OS_PAGE_H
+#define __OS_PAGE_H
 #include <stdint.h>
 
 #define PG_SIZE_BITS                12                      // 12位 即页大小为4KB

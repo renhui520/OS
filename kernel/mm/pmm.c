@@ -35,8 +35,8 @@ uint8_t bitmap[PM_BMP_MAX_SIZE];    // 位图
 
 
 // 初始化 最大页
-// 位图[已占用]
-// 和LOOKUP_START 指向
+// 初始化 位图 为 [已占用]
+// LOOKUP_START 指向 1避免占用NULL指针页
 void pmm_init(uintptr_t mem_upper_lim)
 {
     max_pg = (PG_ALIGN(mem_upper_lim) >> 12);   // PG_ALIGN(mem_upper_lim) >> 10 ==> KiB --> '>>' 2 ==> / 4

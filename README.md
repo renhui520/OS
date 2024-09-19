@@ -32,7 +32,7 @@
   * pmm(Physical Memory Manager 物理内存管理) 2024.9.7, 21:01
   * 优化了mem相关函数，提高处理大块内存的性能 2024.9.11, 23:00
   * vmm(Virtual Memory Manager 虚拟内存管理) 2024.9.16, 20:47
-  * 暂且修复了itoa的bug...
+  * 暂且修复了itoa的bug... 2024.9.16, 21:18
 
 ### 待实现功能：
   * malloc
