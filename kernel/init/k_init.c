@@ -106,6 +106,14 @@ void init(void)
 
    kprintf(KINIT "Done ! \n");
 
+   kprintf(KINIT "Unmap lower mem...\n");
+
+   // 暂且先释放 3 页 ， 可能后面apic要用到
+   for (size_t i = 0; i < 3; i++)
+   {
+      vmm_unmap_page((void *)(i << PG_SIZE_BITS));
+   }
+
    tty_put_str("================================================================================\n");
 
 #pragma endregion   
@@ -140,27 +148,25 @@ void init(void)
    // test malloc
 
    int *a = (int*)malloc(sizeof(int));
+   uint8_t* b = (uint8_t*)malloc(8192);
+
    *a = 100;
 
    kprintf(KINFO "%d\n", a[0]);
 
    free(a);
+   a = NULL;
 
-   uint8_t* b = (uint8_t*)malloc(8192);
    b[0] = 123;
    b[1] = 23;
    b[2] = 3;
 
-   kprintf(KINFO "%d\n", a[0]);  // 写多这一条就会内存溢出？似乎是这个原因
+   // kprintf(KINFO "%d\n", a[0]);  // 禁止空指针访问
    kprintf(KINFO "%u, %u, %u\n", b[0], b[1], b[2]);
 
    free(b);
+   b = NULL;
 
-   // for (int i = 0; i < 2; i++)
-   // {
-   //    kprintf("Hello Wolrd!!!Hello Everyone! Times: %d\n", i+1);
-   // }
-   
    // int a = 1/0;   // 启用了 -Werror 这种情况无法通过编译器，所以无法编译 要触发这种错误就只能另寻他法了
 
    // 触发 1 / 0 异常   这样可以

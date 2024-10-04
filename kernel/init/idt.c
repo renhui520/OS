@@ -15,7 +15,13 @@ void _set_idt_entry(uint32_t vector, uint16_t seg_selector, void(*isr)(), uint8_
     _idt[vector] |= (seg_selector << 16) | (offset & 0x0000FFFF);
 }
 
+
+// 初始化中断向量表，使系统可以从中找到合适的 中断处理函数
+// 找到后会跳转到interrupts.S中接着执行剩余部分
 void _init_idt()
 {
-    _set_idt_entry(FAULT_DIVISION_ERROR, 0x08, _asm_isr_0, 0);  //除以0异常 处理
+    //TODO: 14号 空指针 异常处理
+    _set_idt_entry(FAULT_DIVISION_ERROR, 0x08, _asm_isr_0, 0);  // 除以0异常 处理
+    // _set_idt_entry(FAULT_INVALID_OPCODE, 0x08, _asm_isr_6, 0);  // 无效操作码错误 处理
+    _set_idt_entry(FAULT_PAGE_FAULT, 0x08, _asm_isr_14, 0);  // 空指针 14异常 处理
 }

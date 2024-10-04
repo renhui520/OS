@@ -4,7 +4,9 @@
 #include <hal/io.h>
 
 // 具体中断处理
-void intr_routine_divide_zero(isr_param* param);
+void intr_routine_divide_0(isr_param* param);
+void intr_routine_divide_6(isr_param* param);
+void intr_routine_divide_14(isr_param* param);
 
 
 
@@ -74,13 +76,23 @@ void disable_8259A()
 
 void intr_init()
 {
-    intr_subscribe(0, intr_routine_divide_zero);
+    // TODO: 6 14 号中断处理
+    intr_subscribe(0, intr_routine_divide_0);
+    // intr_subscribe(6, intr_routine_divide_6);
+    intr_subscribe(14, intr_routine_divide_14);
 }
 
 
-void intr_routine_divide_zero(isr_param* param)
+void intr_routine_divide_0(isr_param* param)
 {
     __print_panic_msg("Divide by zero\n", param);
+    // kprintf_panic("     [%s] Divide by zero\n", "ERROR!");
+    while(1);   //不写这个会不断重启!!!
+}
+
+void intr_routine_divide_14(isr_param* param)
+{
+    __print_panic_msg("NULL Pointer!!!!\n", param);
     // kprintf_panic("     [%s] Divide by zero\n", "ERROR!");
     while(1);   //不写这个会不断重启!!!
 }

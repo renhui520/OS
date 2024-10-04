@@ -16,6 +16,7 @@
     isr_template FAULT_DIVISION_ERROR
     isr_template FAULT_GENERAL_PROTECTION, no_error_code=0
     isr_template FAULT_PAGE_FAULT, no_error_code=0
+    isr_template FAULT_INVALID_OPCODE, no_error_code=0
 
     isr_template AWA_SYS_PANIC
 
