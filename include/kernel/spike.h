@@ -1,5 +1,5 @@
-#ifndef __OS_SPIKE_H
-#define __OS_SPIKE_H
+#ifndef __OS_SPIKE_H__
+#define __OS_SPIKE_H__
 
 // Some helper functions. As helpful as Spike the Dragon! :)
 

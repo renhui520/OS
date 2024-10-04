@@ -113,7 +113,7 @@ void _init_page(uint32_t* ptd)
                 )//一页4KB
     }
 
-    
+
     //---- 至此我们仍未将 内核 映射 ----
     //---- 我们所映射的仅仅只是内核代码的0x100000处到 hhk 高半核的内存区域
 
@@ -152,6 +152,7 @@ void _init_page(uint32_t* ptd)
     if (kernel_pg_counts > (PG_TABLE_STACK - PG_TABLE_KERNEL) * PG_MAX_ENTRIES) {
         // ERROR: require more pages
         //  here should do something else other than head into blocking
+        asm("ud2"); // 触发异常 这个汇编指令代表程序不应该到达这里
         while (1);
     }
     

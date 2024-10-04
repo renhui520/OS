@@ -56,6 +56,7 @@ QEMU_MON_PORT := 45454
 
 default: 
 	@echo "Default config is running"
+	make fast-run
 
 # 创建目标文件夹
 $(OBJECT_DIR):

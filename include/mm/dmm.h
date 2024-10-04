@@ -4,6 +4,7 @@
 #include <stdint.h>
 #include <stddef.h>
 
+/* ------------------------专门为 place_chunk coalesce grow_heap 所准备的----------------------- */
 // 已分配
 #define M_ALLOCATED 0x1     // 当前内存块   [已分配]
 #define M_PREV_ALLOCATED 0x0// 前一个内存块  [已分配]
@@ -25,11 +26,14 @@
 
 #define HPTR(bp) ((uint32_t*)(bp)-1)                //获取(返回) 内存块bp的header指针
 #define BPTR(bp) ((uint8_t*)(bp) + WSIZE)           //获取(返回) 内存块bp的 起始 指针
-#define FPTR(hp, size) ((uint32_t*)(hp + size - WSIZE))//获取(返回) 内存块bp的footer指针
+#define FPTR(hp, size) ((uint32_t*)((uintptr_t)hp + size - WSIZE))//获取(返回) 内存块bp的footer指针
 #define NEXT_CHK(hp) ((uint8_t*)(hp) + CHUNK_S(LW(hp)))//获取(返回) 内存块bp的下一个内存块的 起始位置
 
-#define BOUNDARY 4  //内存块边界
-#define WSIZE 4     //内存块大小(单位: 字节)
+/* ----------------------------------------------------------------------------------------- */
+
+
+#define BOUNDARY 4  //内存块 边界对齐 大小
+#define WSIZE 4     //内存块 大小(单位: 字节)
 
 #define HEAP_INIT_SIZE 4096 //堆初始大小
 
@@ -42,13 +46,16 @@ typedef struct
 } heap_context_t;
 
 
-void dmm_init();
+
+int dmm_init(heap_context_t* heap);  // 动态内存初始化，为堆分配内存页
 
 
 // 采用4字节对齐
 int sbrk(heap_context_t* heap, void* addr);   // 设置上限至新的地址
 void* brk(heap_context_t* heap, size_t size);   // 将当前上限扩展到x个字节
-void grow_heap(heap_context_t* heap, size_t size);
+void place_chunk(uint8_t* ptr, size_t size); // 分割空闲内存块，分配出一块大小为size的内存块
+void* coalesce(uint8_t* chunk_ptr); // 合并相邻空闲块
+void* grow_heap(heap_context_t* heap, size_t size); // 增长堆区
 
 
 #endif

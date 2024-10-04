@@ -1,6 +1,8 @@
 #define __LIBC__
 
-#define NULL (void*)0
+#ifndef NULL
+#define NULL ((void*)0)
+#endif
 
 #include <libc/stdlib.h>
 

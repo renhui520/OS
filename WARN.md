@@ -15,7 +15,7 @@ struct a
 
 };
 
-type func(type param);
+type func(type* var_a, type* var_b);
 
 // 这里面不存在任何一个变量！
 // 不允许使用typedef struct！这样影响可读性！
@@ -37,14 +37,20 @@ static type static_var = n;
 
 type var = n;
 
-static type only_here_use_func(type param)
+// 仅在当前文件中被调用则用 static
+static type only_here_use_func(type* var_a, type* var_b)
 {
-
+    type* a = var_a;
+    type* b = var_b;
+    return somthing;
 }
 
-type func(type param)
+// head 头文件中被 声明的函数
+type func(type* var_a, type* var_b)
 {
-
+    type* a = var_a;
+    type* b = var_b;
+    return somthing;
 }
 
 ```

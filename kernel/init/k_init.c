@@ -2,9 +2,11 @@
 #include <libc/stdio.h>
 #include <libc/stdlib.h>
 #include <kernel/sysio.h>
+#include <kernel/common.h>
 
 #include <kernel/interrupts.h>
 
+#include <mm/kalloc.h>
 
 // memcpy memset...
 #include <libc/string.h>
@@ -26,11 +28,10 @@ extern uint8_t __init_hhk_end;
 #define VGA_BUFFER_PADDR    0xB8000UL
 #define VGA_BUFFER_SIZE     4096
 
-
 /*
    
    TODO: 
-         2. 取消之前的1MiB空间映射
+         1. 取消之前的1MiB空间映射
 
 */
 
@@ -46,6 +47,7 @@ LOG_MODULE("OS")
 
 // 内存管理 映射 初始化？
 void setup_memory(multiboot_memory_map_t *map, size_t map_size);
+void setup_kernel_runtime();  //初始化内核 栈区 和 堆区
 
 void init(void)
 {
@@ -98,6 +100,12 @@ void init(void)
 
    kprintf(KINIT "Done ! \n");
 
+   kprintf(KINIT "Initializing Kernel Heap and Stack...\n");
+
+   setup_kernel_runtime(); // 初始化内核堆和内核栈
+
+   kprintf(KINIT "Done ! \n");
+
    tty_put_str("================================================================================\n");
 
 #pragma endregion   
@@ -124,10 +132,29 @@ void init(void)
       kprintf("Frame Buffer height: %d\n", _k_init_mb_info->framebuffer_height);
       if (_k_init_mb_info->framebuffer_addr == 0xb8000UL)
       {
-         kprintf(KWARN "VBE is not enabled.");
+         kprintf(KWARN "VBE is not enabled.\n");
       }
       
    }
+
+   // test malloc
+
+   int *a = (int*)malloc(sizeof(int));
+   *a = 100;
+
+   kprintf(KINFO "%d\n", a[0]);
+
+   free(a);
+
+   uint8_t* b = (uint8_t*)malloc(8192);
+   b[0] = 123;
+   b[1] = 23;
+   b[2] = 3;
+
+   kprintf(KINFO "%d\n", a[0]);  // 写多这一条就会内存溢出？似乎是这个原因
+   kprintf(KINFO "%u, %u, %u\n", b[0], b[1], b[2]);
+
+   free(b);
 
    // for (int i = 0; i < 2; i++)
    // {
@@ -202,6 +229,20 @@ void setup_memory(multiboot_memory_map_t *map, size_t map_size)
 
    kprintf(KLOG "[MM] Mapped VGA to %p.\n", VGA_BUFFER_VADDR);
 }
+
+void setup_kernel_runtime() {
+    // 为内核创建一个专属栈空间。
+    for (size_t i = 0; i < (K_STACK_SIZE >> PG_SIZE_BITS); i++) {
+        vmm_alloc_page((void*)(K_STACK_START + (i << PG_SIZE_BITS)), PG_PREM_RW);
+    }
+    kprintf(KINFO "[MM] Allocated %d pages for stack start at %p\n", K_STACK_SIZE>>PG_SIZE_BITS, K_STACK_START);
+    if (!kalloc_init()) // 初始化内核内存分配器
+    {
+      // kprintf(KERROR "Failed to initialize kernel heap!\n");// 同下
+      kprintf_panic("Failed to initialize kernel heap!");   // 这行代码会导致运行到setup_memory系统重启
+    }
+}
+
 
 // #define __VBE__
 

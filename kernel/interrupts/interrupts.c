@@ -65,7 +65,7 @@ done:
 #define PIC2_DATA    0xA1
 
 #define ICW1_DISABLE    0xFF // Disable PIC
-//禁用PIC
+//禁用PIC 解决中断重启问题
 void disable_8259A()
 {
     outb(PIC1_DATA, ICW1_DISABLE);
