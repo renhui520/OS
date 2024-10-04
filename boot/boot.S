@@ -49,7 +49,7 @@
         mb_info:        // 用于存放multiboot
                 .skip 4096      // 预留4K
         stack_bottom:   // 栈 ：为程序传参提供栈
-                .skip 16318 * 2, 0      // 16*1024*2预留32K
+                .skip 1024 * 2, 0      // 1024*2预留2K
         stack_top:
 
 
