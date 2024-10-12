@@ -13,18 +13,18 @@
 .endm
 
 .section .text
-    isr_template FAULT_DIVISION_ERROR
-    isr_template FAULT_GENERAL_PROTECTION, no_error_code=0
-    isr_template FAULT_PAGE_FAULT, no_error_code=0
-    isr_template FAULT_INVALID_OPCODE, no_error_code=0
+    isr_template FAULT_DIVISION_ERROR                           // 0   号
+    isr_template FAULT_INVALID_OPCODE, no_error_code=0          // 6   号
+    isr_template FAULT_GENERAL_PROTECTION, no_error_code=0      // 13  号
+    isr_template FAULT_PAGE_FAULT, no_error_code=0              // 14  号
 
-    isr_template AWA_SYS_PANIC
+    isr_template AWA_SYS_PANIC                                  // 32  号
 
-    isr_template APIC_ERROR_IV
-    isr_template APIC_LINT0_IV
-    isr_template APIC_TIMER_IV
-    isr_template APIC_SPIV_IV
-    isr_template RTC_TIMER_IV
+    isr_template APIC_ERROR_IV                                  // 200 号
+    isr_template APIC_LINT0_IV                                  // 201 号
+    isr_template APIC_TIMER_IV                                  // 202 号
+    isr_template APIC_SPIV_IV                                   // 203 号
+    isr_template RTC_TIMER_IV                                   // 210 号
     
 	interrupt_wrapper:	//处理中断的函数
         pushl %esp

@@ -104,7 +104,7 @@ void intr_set_fallback_handler(int_subscriber);
 void intr_handler(isr_param* param);
 void intr_routine_init();
 
-void intr_init();
+void intr_other_init();
 
 #endif
 

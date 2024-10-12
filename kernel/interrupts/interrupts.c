@@ -74,12 +74,17 @@ void disable_8259A()
     outb(PIC2_DATA, ICW1_DISABLE);
 }
 
-void intr_init()
+void intr_routine_init()
 {
-    // TODO: 6 14 号中断处理
+    // TODO: 6 号中断处理
     intr_subscribe(0, intr_routine_divide_0);
     // intr_subscribe(6, intr_routine_divide_6);
     intr_subscribe(14, intr_routine_divide_14);
+}
+
+void intr_other_init()
+{
+
 }
 
 
@@ -95,8 +100,4 @@ void intr_routine_divide_14(isr_param* param)
     __print_panic_msg("NULL Pointer!!!!\n", param);
     // kprintf_panic("     [%s] Divide by zero\n", "ERROR!");
     while(1);   //不写这个会不断重启!!!
-}
-void intr_routine_init()
-{
-
 }

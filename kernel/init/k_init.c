@@ -64,7 +64,8 @@ void init(void)
 #pragma region Interrupts init
    // 初始化 中断处理 函数
    kprintf(KINIT "Initializing interrupts...\n");
-   intr_init();
+   intr_routine_init();
+   intr_other_init();   // 似乎是空函数都要调用，不然在debug的时候会导致重启？
    kprintf(KINIT "Interrupts initialized.\n");
 #pragma endregion
 
