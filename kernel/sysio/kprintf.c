@@ -1,7 +1,6 @@
 #define __LIBC__
 
-#define MAX_BUFFER_SIZE 1024
-
+#include <kernel/common.h>
 #include <kernel/sysio.h>
 
 #include <tty/tty.h>

@@ -1,7 +1,7 @@
 #include <boot/idt.h>
 #include <kernel/interrupts.h>
 
-#define IDT_ENTRY_SIZE 256
+#define IDT_ENTRY_SIZE 256      // 256个中断向量
 
 #define IDT_ATTR(dpl)   ((0x70 << 5) | (dpl & 3) << 13 | 1 << 15)
 

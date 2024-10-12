@@ -163,6 +163,12 @@ run: clean $(BUILD_DIR)/$(OS_ISO)
 	@sleep 1
 	@telnet 127.0.0.1 $(QEMU_MON_PORT)
 
+# 运行 但 不调试 (qemu-kvm虚拟机)
+kvm: clean $(BUILD_DIR)/$(OS_ISO)
+	@kvm -cdrom $(BUILD_DIR)/$(OS_ISO) -monitor telnet::$(QEMU_MON_PORT),server,nowait &
+	@sleep 1
+	@telnet 127.0.0.1 $(QEMU_MON_PORT)
+
 quickly-debug: quick-debug
 	@$(OBJCOPY) --only-keep-debug $(BIN_DIR)/$(OS_BIN) $(BUILD_DIR)/kernel.dbg
 	@qemu-system-i386 -m 1G -rtc base=utc -s -S -cdrom $(BUILD_DIR)/$(OS_ISO) -monitor telnet::$(QEMU_MON_PORT),server,nowait &
@@ -186,6 +192,13 @@ debug-qemu-vscode: all-debug
 	@sleep 0.5
 	@telnet 127.0.0.1 $(QEMU_MON_PORT)
 
+# 调试 内核 (qemu-kvm虚拟机)	好像行不通 ;(
+debug-qemu-kvm: all-debug
+	@$(OBJCOPY) --only-keep-debug $(BIN_DIR)/$(OS_BIN) $(BUILD_DIR)/kernel.dbg
+	@qemu-system-i386 -accel kvm -m 1G -rtc base=utc -s -S -cdrom $(BUILD_DIR)/$(OS_ISO) -monitor telnet::$(QEMU_MON_PORT),server,nowait &
+	@sleep 1
+	@$(QEMU_MON_TERM) -- telnet 127.0.0.1 $(QEMU_MON_PORT)
+	@gdb -s $(BUILD_DIR)/kernel.dbg -ex "target remote localhost:1234"
 
 # 清除生成的文件
 clean:

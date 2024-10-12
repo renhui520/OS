@@ -24,9 +24,6 @@ extern uint8_t __kernel_start;
 extern uint8_t __kernel_end;
 extern uint8_t __init_hhk_end;
 
-#define VGA_BUFFER_VADDR    0xB0000000UL
-#define VGA_BUFFER_PADDR    0xB8000UL
-#define VGA_BUFFER_SIZE     4096
 
 /*
    
@@ -56,7 +53,7 @@ void init(void)
    tty_init((void*)0xb8000UL);   // 设置文本内容缓冲区
    tty_clear();
    tty_set_theme(VGA_COLOR_WHITE, VGA_COLOR_BLACK);
-#pragma endregion
+#pragma endregion /* TTY init */
 
    // kernel initing...
    kprintf(KLOG "Kernel Initing...\n");
@@ -67,7 +64,7 @@ void init(void)
    intr_routine_init();
    intr_other_init();   // 似乎是空函数都要调用，不然在debug的时候会导致重启？
    kprintf(KINIT "Interrupts initialized.\n");
-#pragma endregion
+#pragma endregion /* Interrupts init */
 
 #pragma region Mermory Manager init
    // (_k_init_mb_info->mem_upper << 10)将 KiB 转化为 字节
@@ -109,6 +106,7 @@ void init(void)
 
    kprintf(KINIT "Unmap lower mem...\n");
 
+   // 今后再处理这个
    // 暂且先释放 3 页 ， 可能后面apic要用到
    for (size_t i = 0; i < 3; i++)
    {
@@ -117,7 +115,9 @@ void init(void)
 
    tty_put_str("================================================================================\n");
 
-#pragma endregion   
+#pragma endregion /* Mermory Manager init */
+
+#pragma region Multiboot info
 
    // kprintf("MEM_UPPER: %d  Byte\n", _k_init_mb_info->mem_upper << 10);
  
@@ -145,6 +145,8 @@ void init(void)
       }
       
    }
+
+#pragma endregion /* Multiboot info */
 
    // test malloc
 

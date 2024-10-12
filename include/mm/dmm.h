@@ -25,7 +25,7 @@
 #define LW(p) (*((uint32_t*)(p)))                   //从地址p中读取一个uint32_t(32位整数)
 
 #define HPTR(bp) ((uint32_t*)(bp)-1)                //获取(返回) 内存块bp的header指针
-#define BPTR(bp) ((uint8_t*)(bp) + WSIZE)           //获取(返回) 内存块bp的 起始 指针
+#define BPTR(bp) ((uint8_t*)(bp) + WSIZE)           //获取(返回) 内存块bp的 数据开始位置的 地址指针
 #define FPTR(hp, size) ((uint32_t*)((uintptr_t)hp + size - WSIZE))//获取(返回) 内存块bp的footer指针
 #define NEXT_CHK(hp) ((uint8_t*)(hp) + CHUNK_S(LW(hp)))//获取(返回) 内存块bp的下一个内存块的 起始位置
 

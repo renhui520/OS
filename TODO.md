@@ -2,7 +2,7 @@
 
 ## 待实现功能
 - [X] vmm虚拟内存管理
-- [ ] malloc
+- [X] malloc
 - [ ] apic
 - [ ] Linux功能
 - [ ] 线程管理

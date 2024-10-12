@@ -24,6 +24,9 @@
 #define L2_INDEX(vaddr)     (uint32_t)(((uintptr_t)(vaddr) & 0x003FF000UL) >> 12)   // 获取虚拟页表索引   PTE? 保留中10位，右移12位
 #define PG_OFFSET(vaddr)    (uint32_t)((uintptr_t)(vaddr)  & 0x00000FFFUL)        // 获取页内偏移   保留低12位
 
+//PT_ADDR 计算并返回 偏移一个页表(跳过0号页目录表)的地址
+#define PT_ADDR(ptd, pt_index)                          ((uint32_t*)ptd + (pt_index + 1) * 1024)
+
 #define GET_PT_ADDR(pde)    PG_ALIGN(pde)   // 获取页目录地址
 #define GET_PG_ADDR(pte)    PG_ALIGN(pte)   // 获取页表地址
 

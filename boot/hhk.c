@@ -11,14 +11,12 @@
 //若否 返回 0
 #define present(flags, info)      ((flags) & (info))
 
-//PT_ADDR获得偏移一个页表(跳过0号页目录表)的地址
-#define PT_ADDR(ptd, pt_index)                          ((uint32_t*)ptd + (pt_index + 1) * 1024)
 /*
 pde_index为ptd的索引 指向 pde的页表pt
 pde指向页表 也是页目录项
-pde_index范围 [0, 1024) 即 ptd[0][1024]为页目录 超过范围则是其他PT
-例如ptd[0][1024] 则是 ptd[1][0]
-实际上是 SET_PDE(ptd, pde_index, pde)   ptd[0][pde_index] = pde
+pde_index范围 [0, 1023] 但是 ptd[0][1023]为页目录 超过范围则不存在
+
+实际上 SET_PDE(ptd, pde_index, pde) ==  ptd[0][pde_index] = pde
 ptd[0][pde_index] = pde 代表ptd第0个页表(页目录)的第 pde_index 项 等于 pde
 
     |   PD   |  4K  0~1023
@@ -87,7 +85,6 @@ ptd[0][pde_index] = pde 代表ptd第0个页表(页目录)的第 pde_index 项 �
 extern uint8_t __kernel_start;
 extern uint8_t __kernel_end;
 extern uint8_t __init_hhk_end;
-// extern uint8_t _k_stack;
 
 
 /*-----------分页-----------*/
@@ -152,7 +149,7 @@ void _init_page(uint32_t* ptd)
     if (kernel_pg_counts > (PG_TABLE_STACK - PG_TABLE_KERNEL) * PG_MAX_ENTRIES) {
         // ERROR: require more pages
         //  here should do something else other than head into blocking
-        asm("ud2"); // 触发异常 这个汇编指令代表程序不应该到达这里
+        asm("ud2"); // 触发异常 这个汇编指令代表程序不应该到达这里  调用6号中断
         while (1);
     }
     
@@ -193,7 +190,7 @@ void _init_page(uint32_t* ptd)
         VBE_pde_index,                                       // 线性地址 前20位   //之所以选择在kernel_pde_index + i位置开始创建页，是为了避免今后与用户页发生冲突
         NEW_L1_ENTRY(PG_PREM_RW, PT_ADDR(ptd, 10)) // PT_ADDR跳过0号页表，最终获得2+i即二号页表
     )
-    for (int i = 0; i < 1000; i++)
+    for (int i = 0; i < 1024; i++)  // 分配 4MiB ?
     {
         /* code */
         SET_PTE(

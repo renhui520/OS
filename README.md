@@ -10,10 +10,63 @@
   sudo apt install mtools
   sudo apt install grub-pc-bin
   ```
+
+#### 运行方法：
+  * 直接运行:
+  ```shell
+  make run
+  ```
+
+  * debug调试:
+  ```shell
+  make debug-qemu
+  ```
+
+  * debug调试(vscode):
+  ```shell
+  make debug-qemu-vscode
+  ```
+
+  * 快速运行(-O2优化，弱代码规范检查):
+  ```shell
+  make fast-run
+  ```
+
+  * 快速调试(-O2优化，弱代码规范检查):
+  ```shell
+  make quickly-debug
+  ```
+
+  * 快速运行 并 启用测试版功能:
+  ```shell
+  make test
+  ```
+
+  * 快速调试 并 启用测试版功能:
+  ```shell
+  make test-debug
+  ```
+
+  * 编译全部:
+  ```shell
+  make all
+  ```
+
+  * 仅生成内核.bin文件:
+  ```shell
+  make only-kernel
+  ```
+
+  * 清理所有编译出的文件:
+  ```shell
+  make clean
+  ```
+
 #### 警告!
   * 目前大多数功能并未完善
 
 ### 可能存在的问题：
+  * 可能存在内存段越界的问题?(导致OS重启)
   * 中断程序 不完善，可能会存在逻辑错误 2024.9.5, 00:31
   * itoa存在对于十进制和十六进制外的转换问题...暂且能用了 2024.9.16, 21:12
 
@@ -33,10 +86,12 @@
   * 优化了mem相关函数，提高处理大块内存的性能 2024.9.11, 23:00
   * vmm(Virtual Memory Manager 虚拟内存管理) 2024.9.16, 20:47
   * 暂且修复了itoa的bug... 2024.9.16, 21:18
+  * malloc  2024.10.4, 23:55
+  * 修复 idt 导致的重启bug 2024.10.12 21:24
 
 ### 待实现功能：
-  * malloc
   * apic
   * 线程管理
+  * Linux功能
   * VBE图形化显示模式 (取代VGA)(可能要延后很久了...)
 
