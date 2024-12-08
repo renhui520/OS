@@ -66,6 +66,9 @@ void init(void)
    kprintf(KINIT "Interrupts initialized.\n");
 #pragma endregion /* Interrupts init */
 
+// TODO: rtc_init()
+
+
 #pragma region Mermory Manager init
    // (_k_init_mb_info->mem_upper << 10)将 KiB 转化为 字节
    // 1KiB = 2^10字节 1MiB = 2^20字节
@@ -112,6 +115,24 @@ void init(void)
    {
       vmm_unmap_page((void *)(i << PG_SIZE_BITS));
    }
+
+   kprintf(KINIT "Done ! \n");
+
+/*
+   TODO: apic外部中断
+         以及外部io硬件控制
+   
+   
+   这个今后有用?
+   for (size_t i = 256; i < hhk_init_pg_count; i++) {
+        vmm_unmap_page((void*)(i << PG_SIZE_BITS));
+   }
+
+
+
+*/
+
+
 
    tty_put_str("================================================================================\n");
 
