@@ -33,3 +33,11 @@ jobs:
     - name: Build project
       run: |
         make all
+
+    - name: Upload ISO file as artifact
+      uses: actions/upload-artifact@v3
+      with:
+        name: iso-file
+        path: |
+          build/bin/*.bin  # 替换为实际路径
+          build/ios/*.iso
