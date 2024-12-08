@@ -37,6 +37,7 @@ jobs:
     - name: List files in build directory (for debugging)
       run: |
         ls -la build/
+        ls -la build/bin/
 
     - name: Upload ISO file as artifact
       uses: actions/upload-artifact@v3
@@ -44,4 +45,4 @@ jobs:
         name: iso-file
         path: |
           build/bin/*.bin  # 替换为实际路径
-          build/iso/*.iso
+          build/*.iso
