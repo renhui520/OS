@@ -1,0 +1,35 @@
+# .github/workflows/build_os.yml
+
+name: Build OS
+
+# 触发条件：推送代码到 main 分支或创建 Pull Request 到 main 分支
+on:
+  push:
+    branches:
+      - master
+  pull_request:
+    branches:
+      - master
+
+jobs:
+  build:
+
+    runs-on: ubuntu-latest
+
+    steps:
+    - name: Checkout repository
+      uses: actions/checkout@v3
+
+    - name: Set up environment
+      run: |
+        sudo apt update && sudo apt install -y \
+          gcc \
+          make \
+          qemu-system \
+          xorriso \
+          mtools \
+          grub-pc-bin
+          
+    - name: Build project
+      run: |
+        make all
